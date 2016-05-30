@@ -1,0 +1,27 @@
+{
+  "name": "dapp",
+  "version": "1.0.0",
+  "description": "this app is built for dissertation project",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "bootstrap": "^3.3.6",
+    "d3": "^3.5.17",
+    "express": "^4.13.4",
+    "nodemon": "^1.9.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rachmawaty/d.git"
+  },
+  "author": "Rachmawaty Sudirman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rachmawaty/d/issues"
+  },
+  "homepage": "https://github.com/rachmawaty/d#readme"
+}
