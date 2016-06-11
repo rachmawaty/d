@@ -18,16 +18,16 @@
         <script src="/js/jquery.js"></script>
         <!-- Bootstrap Core JavaScript -->
         <script src="/js/bootstrap.min.js"></script>
-        <script type="text/javascript">
-            // function toggleChevron(e) {
-            //     $(e.target)
-            //         .prev('.panel-heading')
-            //         .find("i.indicator")
-            //         .toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
-            // }
+        <!-- <script type="text/javascript">
+            function toggleChevron(e) {
+                $(e.target)
+                    .prev('.panel-heading')
+                    .find("i.indicator")
+                    .toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
+            }
             $('#accordion').on('hidden.bs.collapse', toggleChevron);
             $('#accordion').on('shown.bs.collapse', toggleChevron);
-        </script>
+        </script> -->
     </head>
 
     <body>
@@ -42,7 +42,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#"><b>M</b>anchester<b>LDC</b></a>
+                    <a class="navbar-brand" href="#"><b>M</b>anchester<b>LCD</b></a>
                 </div>
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -54,7 +54,7 @@
                             <a href="datasets">Datasets</a>
                         </li>
                         <li>
-                            <a href="visualisation">Visualisation</a>
+                            <a class="active-menu" style="color:white" href="visualisation">Visualisation</a>
                         </li>
                         <li>
                             <a href="about">About</a>
@@ -129,10 +129,11 @@
                 <div class="col-md-9">
                     <div class="row carousel-holder">
                         <div class="col-md-12">
-                            <div id="carousel-example-generic" class="carousel slide">
+                            <div id="carousel-example-generic" class="visual-box" display="inline-block">
                                 <div class="carousel-inner">
                                     abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefg   hijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz
                                 </div>
+                                <br style="clear: both;" />
                             </div>
                         </div>
                     </div>
