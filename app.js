@@ -8,6 +8,9 @@ var fs = require('fs');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+//jsonld
+var jsonld = require('jsonld');
+
 //D3.js
 var d3 = require('d3');
 // var jsdom = require('jsdom');
