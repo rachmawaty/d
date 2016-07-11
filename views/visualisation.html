@@ -18,8 +18,6 @@
         <script src="js/jquery.js"></script>
         <!-- Bootstrap Core JavaScript -->
         <script src="js/bootstrap.min.js"></script>
-        <!-- Custom CSS -->
-        <!-- <link href="/css/sb-admin.css" rel="stylesheet"> -->
 
         <!-- Morris Charts CSS -->
         <link href="css/plugins/morris.css" rel="stylesheet">
@@ -31,15 +29,6 @@
             $(document).ready(function(){
                 $('#bus-route').hide();
             });
-
-            function check(){
-                $('#bus-route').show();
-                if ($(this).attr("checked") == true) {
-
-                } else {
-                    
-                }
-            }
         </script>>
     </head>
 
@@ -98,7 +87,7 @@
                             <div id="collapseOne" class="panel-collapse collapse in">
                                 <div class="panel-body">
                                     <form action="#" method="get">
-                                      <input type="checkbox" name="mode" value="bus" onclick="check()"> Bus<br>
+                                      <input type="checkbox" name="mode" value="bus"> Bus<br>
                                         <select id="bus-route">
                                           <option value="route-1">Route 1</option>
                                           <option value="route-2">Route 2</option>

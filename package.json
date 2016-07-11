@@ -4,7 +4,6 @@
   "description": "this app is built for dissertation project",
   "main": "app.js",
   "dependencies": {
-    "admin-lte": "^2.3.3",
     "async": "^1.5.2",
     "body-parser": "^1.15.1",
     "bootstrap": "^3.3.6",
