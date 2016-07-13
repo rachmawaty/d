@@ -21,7 +21,7 @@ module.exports = function(app){
 		res.render('about.pug', { active:"about" });
 	});
 
-	app.get('/table', function(req, res){
-		res.render('table.pug');
+	app.get('/category', function(req, res){
+		res.render('category.pug');
 	});
 }
