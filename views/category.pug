@@ -1,0 +1,131 @@
+div.col-md-3
+    p.lead
+        b Category
+    div.panel-group#accordion
+        //- iterate here
+        div.panel.panel-default
+            div.panel-heading
+                h4.panel-title
+                    a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#deprivation") Deprivation
+            div#deprivation.panel-collapse.collapse
+                div.panel
+                    div.panel-heading
+                        h4.panel-title
+                            a.accordion-toggle(data-toggle="collapse", data-parent="#deprivation", href="#deprivation-rank") Rank
+                    div#deprivation-rank.panel-collapse.collapse
+                        div.panel-body
+                            form(action="#", method="get")
+                                input(type="checkbox", name="dataset" value="crime")
+                                span Crime
+                                br
+                                input(type="checkbox", name="dataset" value="education")
+                                span Education
+                                br
+                                input(type="checkbox", name="dataset", value="employment")
+                                span Employment
+                                br
+                                input(type="checkbox", name="dataset", value="environment")
+                                span Environment
+                                br
+                                input(type="checkbox", name="dataset", value="health")
+                                span Health
+                                br
+                                input(type="checkbox", name="dataset", value="housing")
+                                span Housing
+                                br
+                                input(type="checkbox", name="dataset", value="income")
+                                span Income
+                                br
+                                input.btn.btn-default.btn-right#go-rank(type="submit", value="Go")
+                div.panel
+                    div.panel-heading
+                        h4.panel-title
+                            a.accordion-toggle(data-toggle="collapse", data-parent="#deprivation", href="#deprivation-score") Score
+                    div#deprivation-score.panel-collapse.collapse
+                        div.panel-body
+                            form(action="#", method="get")
+                                input(type="checkbox", name="dataset" value="crime")
+                                span Crime
+                                br
+                                input(type="checkbox", name="dataset" value="education")
+                                span Education
+                                br
+                                input(type="checkbox", name="dataset", value="employment")
+                                span Employment
+                                br
+                                input(type="checkbox", name="dataset", value="environment")
+                                span Environment
+                                br
+                                input(type="checkbox", name="dataset", value="health")
+                                span Health
+                                br
+                                input(type="checkbox", name="dataset", value="housing")
+                                span Housing
+                                br
+                                input(type="checkbox", name="dataset", value="income")
+                                span Income
+                                br
+                                input.btn.btn-default.btn-right#go-score(type="submit" class="btn btn-default btn-right" value="Go")
+        
+        div.panel.panel-default
+            div.panel-heading
+                h4.panel-title
+                    a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#public-transport") Public Transport 
+            div#public-transport.panel-collapse.collapse
+                div.panel
+                    div.panel-heading
+                        h4.panel-title
+                            a.accordion-toggle(data-toggle="collapse", data-parent="#public-transport", href="#bus") Bus
+                    div#bus.panel-collapse.collapse
+                        div.panel-body
+                            form(action="#", method="get")
+                                div(style="height: 200px;overflow: scroll;")
+                                    input(type="checkbox", name="route", value="38") 
+                                    span Route 38
+                                    br        
+                                    input(type="checkbox", name="route", value="50") 
+                                    span Route 50
+                                    br
+                                    input(type="checkbox", name="route", value="85") 
+                                    span Route 85
+                                    br
+                                    input(type="checkbox", name="route", value="86") 
+                                    span Route 86
+                                    br
+                                    input(type="checkbox", name="route", value="141") 
+                                    span Route 141
+                                    br
+                                    input(type="checkbox", name="route", value="142") 
+                                    span Route 142
+                                    br
+                                    input(type="checkbox", name="route", value="143") 
+                                    span Route 143
+                                    br
+                                    input(type="checkbox", name="route", value="147") 
+                                    span Route 147
+                                    br
+                                    input(type="checkbox", name="route", value="192") 
+                                    span Route 192
+                                    br
+                                    input(type="checkbox", name="route", value="197") 
+                                    span Route 197
+                                    br
+                                    input(type="checkbox", name="route", value="250") 
+                                    span Route 250
+                                    br
+                                input#go-bus.btn.btn-default.btn-right(type="submit", value="Go")
+                div.panel
+                    div.panel-heading
+                        h4.panel-title
+                            a.accordion-toggle(data-toggle="collapse", data-parent="#public-transport", href="#tram") Tram
+                div.panel
+                    div.panel-heading
+                        h4.panel-title
+                            a.accordion-toggle(data-toggle="collapse", data-parent="#public-transport", href="#train") Train
+
+        div.panel.panel-default
+            div.panel-heading
+                h4.panel-title
+                    a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#others") Other Categories 
+            div#collapseThree.panel-collapse.collapse
+                div.panel-body
