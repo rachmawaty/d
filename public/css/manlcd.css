@@ -31,8 +31,11 @@ body {
 }
 
 .active-menu {
-    /*text-decoration: line-through;*/
     color: white;
+}
+
+.btn-right {
+    float: right;
 }
 
 /* Custom Colored Panels */
