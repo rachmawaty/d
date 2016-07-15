@@ -1,0 +1,25 @@
+div.panel-collapse.collapse(id=category.idxName+"-"+child.idxName)
+    div.panel-body
+        form(action="#", method="get")
+            input(type="checkbox", name="dataset" value="crime")
+            span  Crime
+            br
+            input(type="checkbox", name="dataset" value="education")
+            span  Education
+            br
+            input(type="checkbox", name="dataset", value="employment")
+            span  Employment
+            br
+            input(type="checkbox", name="dataset", value="environment")
+            span  Environment
+            br
+            input(type="checkbox", name="dataset", value="health")
+            span  Health
+            br
+            input(type="checkbox", name="dataset", value="housing")
+            span  Housing
+            br
+            input(type="checkbox", name="dataset", value="income")
+            span  Income
+            br
+            input.btn.btn-default.btn-right(id=child.label, type="submit", value="Go")
