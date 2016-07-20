@@ -76,7 +76,7 @@ module.exports = function (app, models){
 			});
 		}
 	}
-	addDatasets();
+	// addDatasets();
 
 	var checkJSON = function(){
 		var datasets = ["imd/score/health", "imd/score/education", "imd/score/environment"]
@@ -102,4 +102,53 @@ module.exports = function (app, models){
 		}
 	}
 	// checkJSON();
+
+	var getCategoriesAndDatasets = function(){
+		models.categories.findByLevel(0, function(err, parent_categories){
+			if (err) console.log(err);
+			var categories = [];
+			app.async.each(parent_categories, function (parent_category, cb_parent) {
+				var p_category = parent_category.toObject();
+				models.categories.findByParentIdxName(parent_category.idxName, function(err, children_categories){
+					if (err) console.log(err);
+					var c_categories = [];
+					app.async.each(children_categories, function (child_category, cb_child) {
+						var c_category = child_category.toObject();	
+						models.datasets.findByCategoryId(c_category._id, function(err, datasets){
+							if (err) console.log(err);
+							var c_datasets = [];
+							app.async.each(datasets, function(dataset, cb_dts){
+								c_datasets.push(dataset.toObject());
+								cb_dts();
+							}, function(err){
+								c_category.datasets = c_datasets;
+								c_categories.push(c_category);
+								cb_child();
+							});
+						});
+					}, function(err){
+						if (err) console.log(err);
+						p_category.children = c_categories;
+						categories.push(p_category);
+						cb_parent();
+					});
+				});
+			}, function (err) {
+				if (err) console.log(error);
+				for (var i=0;i<categories.length;i++){
+					if (categories[i].children.length>0){
+						for(var j=0;j<categories[i].children.length;j++){
+							console.log(categories[i].label, categories[i].children[j].label);
+							if (categories[i].children[j].datasets.length>0) {
+								for (var k = 0; k<categories[i].children[j].datasets.length;k++){
+									console.log(categories[i].children[j].datasets[k].label);
+								}
+							}
+						}
+					}
+				}
+			});
+		});
+	}
+	// getDatasets();
 }
