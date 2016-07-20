@@ -9,13 +9,14 @@ app.fs = require('fs');
 app.async = require('async');
 app.moment = require("moment");
 
-/*** data connection***/
+/*** data connection ***/
 app.mongoStore = require('connect-mongo');
 app.mongoose = require('mongoose');
 app.mongoose.connect('mongodb://localhost:27017/dapp');
+// app.n3 = require('n3');
+// app.rdfstore = require('rdfstore');
 
-app.n3 = require('n3');
-app.rdfstore = require('rdfstore');
+app.http = require('http');
 
 app.dir = __dirname;
 global.Async = app.async;
@@ -37,8 +38,3 @@ var next = function() {
 };
 
 next();
-
-//port --> localhost:2525
-// app.listen(2525, function(){
-// 	console.log('Listening at port 2525');
-// });

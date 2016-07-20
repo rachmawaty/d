@@ -35,13 +35,15 @@ module.exports = function(mongoose) {
 		});
 	};
 
+	model.findByParentId = function(parentId, callback) {
+		model.find({parentId: parentId}, function(err, categories) {
+			if (err) console.log(err);
+			callback(err, categories);
+		});
+	};
+
 	model.findByParentIdxName = function(parentIdxName, callback) {
 		model.find({parentIdxName: parentIdxName}, function(err, categories) {
-			// var ret = [];
-			// for (var i=0;i<categories.length;++i) {
-			// 	ret.push(categories[i].toObject());
-			// }
-			// callback(err, ret);
 			if (err) console.log(err);
 			callback(err, categories);
 		});
