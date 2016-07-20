@@ -22,8 +22,8 @@ module.exports = function(mongoose) {
 		});
 	};
 
-	model.findById = function(category_id, callback) {
-		model.findOne({_id: category_id}, function(err, category) {
+	model.findById = function(categoryId, callback) {
+		model.findOne({_id: categoryId}, function(err, category) {
 			callback(err, category);
 		});
 	};
@@ -47,6 +47,19 @@ module.exports = function(mongoose) {
 			if (err) console.log(err);
 			callback(err, categories);
 		});
+	};
+
+	model.updateParentId = function(id, parentId, callback) {
+        var conditions = {_id: id}
+	        , update = { $set: { 
+	        	parentId: parentId
+	        }}
+	        , options = { multi: false };
+        model.update(conditions, update, options, function (err, numAffected) {
+          if(err) console.log(err);
+          console.log(numAffected + 'updated');
+          callback(err);
+        });
 	};
 
 	model.newCategory = function(label, level, idxName, parentIdxName, callback ) {

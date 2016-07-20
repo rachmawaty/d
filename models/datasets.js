@@ -23,24 +23,44 @@ module.exports = function(mongoose) {
 		});
 	};
 
-	model.findById = function(category_id, callback) {
-		model.findOne({_id: category_id}, function(err, dataset) {
+	model.findById = function(datasetId, callback) {
+		model.findOne({_id: datasetId}, function(err, dataset) {
 			callback(err, dataset);
 		});
 	};
 
-	model.findByLevel = function(level, callback) {
-		model.find({level: level}, function(err, datasets) {
+	model.findByCategoryId = function(categoryId, callback) {
+		model.find({categoryId: categoryId}, function(err, datasets) {
 			if (err) console.log(err);
 			callback(err, datasets);
 		});
 	};
 
-	model.findByParentIdxName = function(parentIdxName, callback) {
-		model.find({parentIdxName: parentIdxName}, function(err, datasets) {
-			if (err) console.log(err);
-			callback(err, datasets);
-		});
+	model.updateSourceLink = function(id, sourceLink, callback) {
+        var conditions = {_id: id}
+	        , update = { $set: { 
+	        	sourceLink: sourceLink
+	        }}
+	        , options = { multi: false };
+        model.update(conditions, update, options, function (err, numAffected) {
+          if(err) console.log(err);
+          console.log(numAffected + 'updated');
+          callback(err);
+        });
+	};
+
+	model.updateLocation = function(id, hasLocation, locationId, callback) {
+        var conditions = {_id: id}
+	        , update = { $set: { 
+	        	hasLocation: hasLocation,
+	        	locationId: locationId
+	        }}
+	        , options = { multi: false };
+        model.update(conditions, update, options, function (err, numAffected) {
+          if(err) console.log(err);
+          console.log(numAffected + 'updated');
+          callback(err);
+        });
 	};
 
 	model.newDataset = function(label, idxName, sourceLink, namedGraph, categoryId, callback ) {

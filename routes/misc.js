@@ -21,7 +21,6 @@ module.exports = function (app, models){
 			});
 		}
 	}
-
 	// addCategories();
 
 	var getParentAndChildren = function(){
@@ -49,18 +48,21 @@ module.exports = function (app, models){
 			});
 		});
 	}
-
 	// getParentAndChildren();
 
 	var addDatasets = function(){
-		// label: label,
+		//  label: label,
 		// 	idxName: idxName,
 		// 	sourceLink: sourceLink,
 		// 	namedGraph: namedGraph,
 		// 	categoryId: categoryId
 		var insertedDatasets = [
-		{label: 'Deprivation', idxName: 'imd', sourceLink: '', namedGraph:'', categoryId: ''}, 
-		{label: 'Deprivation', idxName: 'imd', sourceLink: '', namedGraph:'', categoryId: ''}];
+		{label: 'Education', idxName: 'imd-score-education', sourceLink: '', namedGraph:'<http://localhost:8890/imd/score/education>', categoryId: '5789373a1822f78f17a12bea'}, 
+		{label: 'Environment', idxName: 'imd-score-environment', sourceLink: '', namedGraph:'<http://localhost:8890/imd/score/environment>', categoryId: '5789373a1822f78f17a12bea'},
+		{label: 'Health', idxName: 'imd-score-health', sourceLink: '', namedGraph:'<http://localhost:8890/imd/score/health>', categoryId: '5789373a1822f78f17a12bea'},
+		{label: 'Education', idxName: 'imd-rank-education', sourceLink: '', namedGraph:'<http://localhost:8890/imd/rank/education>', categoryId: '5789373a1822f78f17a12be9'}, 
+		{label: 'Environment', idxName: 'imd-rank-environment', sourceLink: '', namedGraph:'<http://localhost:8890/imd/rank/environment>', categoryId: '5789373a1822f78f17a12be9'},
+		{label: 'Health', idxName: 'imd-rank-health', sourceLink: '', namedGraph:'<http://localhost:8890/imd/rank/health>', categoryId: '5789373a1822f78f17a12be9'}];
 
 		for(var i=0;i<insertedDatasets.length;i++){
 			var label = insertedDatasets[i].label;
@@ -69,117 +71,12 @@ module.exports = function (app, models){
 			var namedGraph = insertedDatasets[i].namedGraph;
 			var categoryId = insertedDatasets[i].categoryId;
 			// console.log(insertedCategories[i]);
-			models.datasets.newCategory(label, idxName, sourceLink, namedGraph, categoryId, function(err, dset){
+			models.datasets.newDataset(label, idxName, sourceLink, namedGraph, categoryId, function(err, dset){
 				console.log(dset);
 			});
 		}
 	}
-
-	// addDatasets();
-
-	/**** coba RDFSTORE ****/
-	var storeInRDFStore = function(){
-		console.log("***** RDFStore *****");
-		console.log("**** Create Store ****");
-		app.rdfstore.create(function(err, store) {
-			console.log("***** store.functionMap *****");
-			console.log(store.functionMap);
-			console.log("***** store.customFns *****");
-			console.log(store.customFns);
-			console.log("***** store.engine.backend *****");
-			console.log(store.engine.backend);
-			console.log("***** store.engine.lexicon *****");
-			console.log(store.engine.lexicon);
-			console.log("***** store.engine.rdfLoader *****");
-			console.log(store.engine.rdfLoader);
-			console.log("***** store.engine.callbacksBackend *****");
-			console.log(store.engine.callbacksBackend);
-		});
-
-		console.log("****************************************");
-	}
-
-	// storeInRDFStore();
-
-	var tryRDFStore = function(){
-		console.log("***** RDFStore *****");
-		console.log("**** Create Store ****");
-		var fileString = app.fs.readFileSync(app.dir + '/rdf/imd-rank-education.nt').toString();
-		app.rdfstore.create(function(err, store) {
-			// var parser = app.n3.Parser(),
-   //  		rdfStream = app.fs.createReadStream(fileString);
-			// parser.parse(rdfStream, console.log);
-			// var streamParser = app.n3.StreamParser(),
-   //  		rdfStream = app.fs.createReadStream(fileString);
-			// rdfStream.pipe(streamParser);
-			// streamParser.pipe(new SlowConsumer());
-			 
-			// function SlowConsumer() {
-			//   var writer = new require('stream').Writable({ objectMode: true });
-			//   writer._write = function (triple, encoding, done) {
-			//     console.log(triple);
-			//     setTimeout(done, 200000);
-			//   };
-			//   return writer;
-			// }
-			store.load("text/n3", fileString, "<http://example.org/imd>", function(err, loaded) {
-				if (err) console.log(err);
-				console.log("triples loaded: ", loaded);
-				var query = "SELECT * { GRAPH <http://example.org/imd> { ?s ?p ?o } } limit 10";
-				store.execute(query, function(err, results){
-					console.log(err, results.length);
-				});
-				
-			// 	store.registeredGraphs(function(err, res){
-			// 		console.log(res);
-			// 		store.graph("http://example.org/imd", function(err, res){
-			// 			if (err) console.log("ERR: " + err);
-			// 			console.log(res);
-			// 		});
-			// 	});
-			});
-		});
-	}
-
-	// tryRDFStore();
-
-	var tryRDFStore2 = function(){
-		console.log("***** RDFStore *****");
-		console.log("**** Create Store ****");
-		// http://localhost:8890/imd/rank/crime
-		app.rdfstore.create(function(err, store) {
-			// store.execute('LOAD <http://dbpedia.org/resource/Tim_Berners-Lee> INTO GRAPH <http://example.org/people>', function() {
-			// 	store.execute('SELECT ?s { GRAPH <http://example.org/people> { ?s ?p ?o } }', function(err, results) {
-   //               	console.log(results.length);
-   //              });
-			// });
-			store.execute('LOAD <http://localhost:8890/imd/rank/crime> INTO GRAPH <http://example.org/people>', function(err) {
-				console.log("loaded: ", err);
-				store.execute('SELECT ?s { GRAPH <http://example.org/people> { ?s ?p ?o } }', function(err, results) {
-                 	console.log(results.length);
-                });
-			});
-		});	
-	}
-
-	// tryRDFStore2();
-
-	var boo = function(){
-		new Store({name:'test', overwrite:true}, function(err,store){
-		    store.execute('INSERT DATA {  <http://example/person1> <http://xmlns.com/foaf/0.1/name> "Celia" }', function(err){
-
-		       store.registerDefaultProfileNamespaces();
-				// simple query execution
-				// console.log(store.registerDefaultProfileNamespaces());
-				// var n3Parser = store.registerParser("text/n3", n3Parser);
-		       store.execute('SELECT * { ?s foaf:name ?name }', function(err,results) {
-		       	console.log(results);
-		       });
-		    });
-		    store.close();
-		});
-	}
-	// boo();
+	addDatasets();
 
 	var checkJSON = function(){
 		var datasets = ["imd/score/health", "imd/score/education", "imd/score/environment"]
@@ -204,5 +101,5 @@ module.exports = function (app, models){
 			});
 		}
 	}
-	checkJSON();
+	// checkJSON();
 }
