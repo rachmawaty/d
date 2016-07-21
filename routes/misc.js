@@ -79,10 +79,12 @@ module.exports = function (app, models){
 	// addDatasets();
 
 	var checkJSON = function(){
-		var datasets = ["imd/score/health", "imd/score/education", "imd/score/environment"]
-		for (var i = 0; i<datasets.length; i++){
-			var namedGraph = "<http://localhost:8890/"+datasets[i]+">";
-			console.log(namedGraph);
+		var datasets = ["imd/score/health", "imd/score/education", "imd/score/environment"];
+		var results = [];
+		// for (var i = 0; i<datasets.length; i++){
+		app.async.each(datasets, function(dataset, cb_dt){
+			var namedGraph = "<http://localhost:8890/"+dataset+">";
+			// console.log(namedGraph);
 			var query = "select distinct * where {graph "+ namedGraph +" {?s ?p ?o}} order by ?s LIMIT 10";
 			var api = "http://localhost:8890/sparql?query=" + query + "&format=json";
 			app.http.get(api, function(res){
@@ -94,12 +96,21 @@ module.exports = function (app, models){
 
 			    res.on('end', function(){
 			        var dt = JSON.parse(body);
-			        console.log("Got a response: ", dt.results.bindings[0].s);
+			        // console.log("Got a response: ", dt.results.bindings[0].s);
+			        results.push(dt.results);
+			        cb_dt();
 			    });
 			}).on('error', function(e){
-			      console.log("Got an error: ", e);
+			    console.log("Got an error: ", e);
+			    cb_dt();
 			});
-		}
+		}, function(err){
+			if (err) console.log(err);
+			console.log("Last response: ", results.length, results[0].bindings[0]);
+			return results;
+		});
+			
+		// }
 	}
 	// checkJSON();
 
@@ -151,4 +162,80 @@ module.exports = function (app, models){
 		});
 	}
 	// getDatasets();
+
+	var lala = function(){
+		app.async.parallel([
+			function(callback){
+				models.categories.findByLevel(0, function(err, parent_categories){
+					if (err) console.log(err);
+					var categories = [];
+					app.async.each(parent_categories, function (parent_category, cb_parent) {
+						var p_category = parent_category.toObject();
+						models.categories.findByParentIdxName(parent_category.idxName, function(err, children_categories){
+							if (err) console.log(err);
+							var c_categories = [];
+							app.async.each(children_categories, function (child_category, cb_child) {
+								var c_category = child_category.toObject();	
+								models.datasets.findByCategoryId(c_category._id, function(err, datasets){
+									if (err) console.log(err);
+									var c_datasets = [];
+									app.async.each(datasets, function(dataset, cb_dts){
+										c_datasets.push(dataset.toObject());
+										cb_dts();
+									}, function(err){
+										c_category.datasets = c_datasets;
+										c_categories.push(c_category);
+										cb_child();
+									});
+								});
+							}, function(err){
+								if (err) console.log(err);
+								p_category.children = c_categories;
+								categories.push(p_category);
+								cb_parent();
+							});
+						});
+					}, function (err) {
+						// if (err) console.log(error);
+						// console.log(categories);
+						callback(err, categories);
+					});
+				});
+			}, function(callback){
+				var datasets = ["imd/score/health", "imd/score/education", "imd/score/environment"];
+				var results = [];
+				app.async.each(datasets, function(dataset, cb_dt){
+					var namedGraph = "<http://localhost:8890/"+dataset+">";
+					// console.log(namedGraph);
+					var query = "select distinct * where {graph "+ namedGraph +" {?s ?p ?o}} order by ?s LIMIT 10";
+					var api = "http://localhost:8890/sparql?query=" + query + "&format=json";
+					app.http.get(api, function(res){
+					    var body = '';
+
+					    res.on('data', function(chunk){
+					        body += chunk;
+					    });
+
+					    res.on('end', function(){
+					        var dt = JSON.parse(body);
+					        // console.log("Got a response: ", dt.results.bindings[0].s);
+					        results.push(dt.results);
+					        cb_dt();
+					    });
+					}).on('error', function(e){
+					    console.log("Got an error: ", e);
+					    cb_dt();
+					});
+				}, function(err){
+					if (err) console.log(err);
+					console.log("Last response: ", results.length, results[0].bindings[0]);
+					callback(err, results);
+				});
+			}
+		], function(err, results){
+			if (err) console.log(error);
+			console.log(results[1]);
+		});
+	}
+	// lala();
 }

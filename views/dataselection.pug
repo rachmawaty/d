@@ -4,6 +4,7 @@ div.panel-collapse.collapse(id=category.idxName+"-"+child.idxName)
             form(action="/filter", method="get")
                 each dataset in child.datasets
                     input(type="checkbox", name="dataset" value=dataset.idxName)
-                    span  #{dataset.label}
+                    span 
+                        a(href="#") #{dataset.label}
                     br
                 input.btn.btn-default.btn-right(id=child.label, type="submit", value="Go")
