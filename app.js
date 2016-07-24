@@ -31,6 +31,7 @@ app.set('view engine', 'pug');
 var models = {};
 models.categories = require('./models/categories')(app.mongoose).model;
 models.datasets = require('./models/datasets')(app.mongoose).model;
+models.predicates = require('./models/predicates')(app.mongoose).model;
 
 var next = function() {
     app.listen(2525);

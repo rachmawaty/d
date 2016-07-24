@@ -51,18 +51,13 @@ module.exports = function (app, models){
 	// getParentAndChildren();
 
 	var addDatasets = function(){
-		//  label: label,
-		// 	idxName: idxName,
-		// 	sourceLink: sourceLink,
-		// 	namedGraph: namedGraph,
-		// 	categoryId: categoryId
 		var insertedDatasets = [
-		{label: 'Education', idxName: 'imd-score-education', sourceLink: '', namedGraph:'<http://localhost:8890/imd/score/education>', categoryId: '5789373a1822f78f17a12bea'}, 
-		{label: 'Environment', idxName: 'imd-score-environment', sourceLink: '', namedGraph:'<http://localhost:8890/imd/score/environment>', categoryId: '5789373a1822f78f17a12bea'},
-		{label: 'Health', idxName: 'imd-score-health', sourceLink: '', namedGraph:'<http://localhost:8890/imd/score/health>', categoryId: '5789373a1822f78f17a12bea'},
-		{label: 'Education', idxName: 'imd-rank-education', sourceLink: '', namedGraph:'<http://localhost:8890/imd/rank/education>', categoryId: '5789373a1822f78f17a12be9'}, 
-		{label: 'Environment', idxName: 'imd-rank-environment', sourceLink: '', namedGraph:'<http://localhost:8890/imd/rank/environment>', categoryId: '5789373a1822f78f17a12be9'},
-		{label: 'Health', idxName: 'imd-rank-health', sourceLink: '', namedGraph:'<http://localhost:8890/imd/rank/health>', categoryId: '5789373a1822f78f17a12be9'}];
+		{label: 'Education', idxName: 'imd-score-education', sourceLink: '', namedGraph:'http://localhost:8890/imd/score/education', categoryId: '5789373a1822f78f17a12bea'}, 
+		{label: 'Environment', idxName: 'imd-score-environment', sourceLink: '', namedGraph:'http://localhost:8890/imd/score/environment', categoryId: '5789373a1822f78f17a12bea'},
+		{label: 'Health', idxName: 'imd-score-health', sourceLink: '', namedGraph:'http://localhost:8890/imd/score/health', categoryId: '5789373a1822f78f17a12bea'},
+		{label: 'Education', idxName: 'imd-rank-education', sourceLink: '', namedGraph:'http://localhost:8890/imd/rank/education', categoryId: '5789373a1822f78f17a12be9'}, 
+		{label: 'Environment', idxName: 'imd-rank-environment', sourceLink: '', namedGraph:'http://localhost:8890/imd/rank/environment', categoryId: '5789373a1822f78f17a12be9'},
+		{label: 'Health', idxName: 'imd-rank-health', sourceLink: '', namedGraph:'http://localhost:8890/imd/rank/health', categoryId: '5789373a1822f78f17a12be9'}];
 
 		for(var i=0;i<insertedDatasets.length;i++){
 			var label = insertedDatasets[i].label;
@@ -77,42 +72,6 @@ module.exports = function (app, models){
 		}
 	}
 	// addDatasets();
-
-	var checkJSON = function(){
-		var datasets = ["imd/score/health", "imd/score/education", "imd/score/environment"];
-		var results = [];
-		// for (var i = 0; i<datasets.length; i++){
-		app.async.each(datasets, function(dataset, cb_dt){
-			var namedGraph = "<http://localhost:8890/"+dataset+">";
-			// console.log(namedGraph);
-			var query = "select distinct * where {graph "+ namedGraph +" {?s ?p ?o}} order by ?s LIMIT 10";
-			var api = "http://localhost:8890/sparql?query=" + query + "&format=json";
-			app.http.get(api, function(res){
-			    var body = '';
-
-			    res.on('data', function(chunk){
-			        body += chunk;
-			    });
-
-			    res.on('end', function(){
-			        var dt = JSON.parse(body);
-			        // console.log("Got a response: ", dt.results.bindings[0].s);
-			        results.push(dt.results);
-			        cb_dt();
-			    });
-			}).on('error', function(e){
-			    console.log("Got an error: ", e);
-			    cb_dt();
-			});
-		}, function(err){
-			if (err) console.log(err);
-			console.log("Last response: ", results.length, results[0].bindings[0]);
-			return results;
-		});
-			
-		// }
-	}
-	// checkJSON();
 
 	var getCategoriesAndDatasets = function(){
 		models.categories.findByLevel(0, function(err, parent_categories){
@@ -161,81 +120,240 @@ module.exports = function (app, models){
 			});
 		});
 	}
-	// getDatasets();
+	// getCategoriesAndDatasets();
 
-	var lala = function(){
-		app.async.parallel([
-			function(callback){
-				models.categories.findByLevel(0, function(err, parent_categories){
-					if (err) console.log(err);
-					var categories = [];
-					app.async.each(parent_categories, function (parent_category, cb_parent) {
-						var p_category = parent_category.toObject();
-						models.categories.findByParentIdxName(parent_category.idxName, function(err, children_categories){
-							if (err) console.log(err);
-							var c_categories = [];
-							app.async.each(children_categories, function (child_category, cb_child) {
-								var c_category = child_category.toObject();	
-								models.datasets.findByCategoryId(c_category._id, function(err, datasets){
-									if (err) console.log(err);
-									var c_datasets = [];
-									app.async.each(datasets, function(dataset, cb_dts){
-										c_datasets.push(dataset.toObject());
-										cb_dts();
-									}, function(err){
-										c_category.datasets = c_datasets;
-										c_categories.push(c_category);
-										cb_child();
-									});
-								});
-							}, function(err){
-								if (err) console.log(err);
-								p_category.children = c_categories;
-								categories.push(p_category);
-								cb_parent();
-							});
-						});
-					}, function (err) {
-						// if (err) console.log(error);
-						// console.log(categories);
-						callback(err, categories);
-					});
+	var checkJSON = function(){
+		var datasets = ["imd/score/health", "imd/score/education", "imd/score/environment"];
+		var results = [];
+		// for (var i = 0; i<datasets.length; i++){
+		app.async.each(datasets, function(dataset, cb_dt){
+			var namedGraph = "<http://localhost:8890/"+dataset+">";
+			// console.log(namedGraph);
+			var query = "select distinct * where {graph "+ namedGraph +" {?s ?p ?o}} order by ?s LIMIT 10";
+			var api = "http://localhost:8890/sparql?query=" + query + "&format=json";
+			app.http.get(api, function(res){
+			    var body = '';
+
+			    res.on('data', function(chunk){
+			        body += chunk;
+			    });
+
+			    res.on('end', function(){
+			        var dt = JSON.parse(body);
+			        // console.log("Got a response: ", dt.results.bindings[0].s);
+			        results.push(dt.results);
+			        cb_dt();
+			    });
+			}).on('error', function(e){
+			    console.log("Got an error: ", e);
+			    cb_dt();
+			});
+		}, function(err){
+			if (err) console.log(err);
+			console.log("Last response: ", results.length, results[0].bindings[0]);
+			return results;
+		});
+			
+		// }
+	}
+	// checkJSON();
+
+	var getPredicates = function(callback){
+		var results = [];
+		models.datasets.findAll(function(err, datasets){
+			app.async.each(datasets, function(dataset, cb){
+				var query = "select distinct ?p where {graph <"+ dataset.namedGraph +"> {?s ?p ?o}} order by ?s LIMIT 10";
+				var api = "http://localhost:8890/sparql?query=" + query + "&format=json";
+				app.http.get(api, function(res){
+				    var body = '';
+
+				    res.on('data', function(chunk){
+				        body += chunk;
+				    });
+
+				    res.on('end', function(){
+				        var dt = JSON.parse(body);
+				        var result = [];
+				        result.dataset = dataset.toObject();
+				        result.content = dt.results;
+				        results.push(result);
+				        cb();
+				    });
+				}).on('error', function(e){
+				    console.log("Got an error: ", e);
+				    cb();
 				});
-			}, function(callback){
-				var datasets = ["imd/score/health", "imd/score/education", "imd/score/environment"];
-				var results = [];
-				app.async.each(datasets, function(dataset, cb_dt){
-					var namedGraph = "<http://localhost:8890/"+dataset+">";
-					// console.log(namedGraph);
-					var query = "select distinct * where {graph "+ namedGraph +" {?s ?p ?o}} order by ?s LIMIT 10";
-					var api = "http://localhost:8890/sparql?query=" + query + "&format=json";
-					app.http.get(api, function(res){
-					    var body = '';
-
-					    res.on('data', function(chunk){
-					        body += chunk;
-					    });
-
-					    res.on('end', function(){
-					        var dt = JSON.parse(body);
-					        // console.log("Got a response: ", dt.results.bindings[0].s);
-					        results.push(dt.results);
-					        cb_dt();
-					    });
-					}).on('error', function(e){
-					    console.log("Got an error: ", e);
-					    cb_dt();
+			}, function(err){
+				if (err) console.log(err);
+				// console.log("Got a response: ", results.length);
+				var predicates = [];
+				app.async.each(results, function(result, cb_result){
+					// console.log(result.dataset.label);
+					app.async.each(result.content.bindings, function(binding, cb_binding){
+						var p = binding.p.value;
+						// console.log(p);
+						if (predicates.indexOf(p) == -1){
+							predicates.push(p);
+							cb_binding();
+						} else {
+							cb_binding();
+						}
+					}, function(err){
+						if (err) console.log(err);
+						cb_result();
 					});
 				}, function(err){
 					if (err) console.log(err);
-					console.log("Last response: ", results.length, results[0].bindings[0]);
-					callback(err, results);
+					// console.log(predicates.length);
+					callback(err, predicates);
 				});
-			}
-		], function(err, results){
-			if (err) console.log(error);
-			console.log(results[1]);
+			});
+		});
+	}
+	// getPredicates(function(err, predicates){
+	// 	console.log(predicates);
+	// });
+
+	var getPredicatesByDatasetId = function(datasetId, callback){
+		var predicates = [];
+		models.datasets.findById(datasetId, function(err, dataset){
+			var query = "select distinct ?p where {graph <"+ dataset.namedGraph +"> {?s ?p ?o}} order by ?s LIMIT 10";
+			var api = "http://localhost:8890/sparql?query=" + query + "&format=json";
+			app.http.get(api, function(res){
+			    var body = '';
+
+			    res.on('data', function(chunk){
+			        body += chunk;
+			    });
+
+			    res.on('end', function(){
+			        var dt = JSON.parse(body);
+			        app.async.each(dt.results.bindings, function(binding, cb_binding){
+						var p = binding.p.value;
+						// console.log(p);
+						if (predicates.indexOf(p) == -1){
+							predicates.push(p);
+							cb_binding();
+						} else {
+							cb_binding();
+						}
+					}, function(err){
+						if (err) console.log(err);
+						callback(err, predicates);
+					});
+			    });
+			}).on('error', function(e){
+			    console.log("Got an error: ", e);
+			});
+		});
+	}
+
+	var savePredicates = function(){
+		getPredicates(function(err, predicates){
+			console.log(predicates.length, predicates);
+			app.async.each(predicates, function(predicate, cb){
+				models.predicates.newPredicate("att", predicate, "prefix", "namespace", function(err, predicate){
+					console.log(predicate);
+					cb();
+				});
+			}, function(err){
+				if (err) console.log(err);
+			});
+		});
+	}
+	// savePredicates();
+
+	var tryToStorePredicates = function(){
+		var predicates = [ {label: 'Type', uri:'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', prefix:"rdf", namespace:'http://www.w3.org/1999/02/22-rdf-syntax-ns#'},
+						  {label: 'Label', uri:'http://www.w3.org/2000/01/rdf-schema#label', prefix:"rdfs", namespace:'http://www.w3.org/2000/01/rdf-schema#'},
+						  {label: 'Dataset', uri:'http://purl.org/linked-data/cube#dataSet', prefix:"rdfs", namespace:''},
+						  {label: 'Ref Area', uri:'http://opendatacommunities.org/def/ontology/geography/refArea', prefix:"rdfs", namespace:''},
+						  {label: 'Ref Period', uri:'http://opendatacommunities.org/def/ontology/time/refPeriod', prefix:"rdfs", namespace:''},
+						  {label: 'Environment Rank', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'Health Rank', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'Health Score', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'Education Score', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'Education Rank', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'Environment Score', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'}
+						 ];
+	 	app.async.each(predicates, function(predicate, cb){
+			models.predicates.newPredicate(predicate.label, predicate.uri, predicate.prefix, predicate.namespace, function(err, predicate){
+				console.log(predicate);
+				cb();
+			});
+		}, function(err){
+			if (err) console.log(err);
+		});
+	}
+	// tryToStorePredicates();
+
+	var lala = function(){
+		models.predicates.findAll(function(err, predicates){
+			app.async.each(predicates, function(predicate, cb_p){
+				console.log(predicate._id, predicate.uri);
+				cb_p();
+			}, function(err){
+				if (err) console.log(err);
+			});
 		});
 	}
 	// lala();
+
+	var getDatasetsAndPredicates = function(callback){
+		var results = [];
+		models.datasets.findAll(function(err, datasets){
+			app.async.each(datasets, function(dataset, cb){
+				var query = "select distinct ?p where {graph <"+ dataset.namedGraph +"> {?s ?p ?o}} order by ?s LIMIT 10";
+				var api = "http://localhost:8890/sparql?query=" + query + "&format=json";
+				app.http.get(api, function(res){
+				    var body = '';
+
+				    res.on('data', function(chunk){
+				        body += chunk;
+				    });
+
+				    res.on('end', function(){
+				        var dt = JSON.parse(body);
+				        var result = [];
+				        var predicates = [];
+				        app.async.each(dt.results.bindings, function(binding, cb_binding){
+							var p = binding.p.value;
+							if (predicates.indexOf(p) == -1){
+								predicates.push(p);
+								cb_binding();
+							} else {
+								cb_binding();
+							}
+						}, function(err){
+							if (err) console.log(err);
+							result.dataset = dataset.toObject();
+					        result.predicates = predicates;
+					        results.push(result);
+							cb();
+						});
+				    });
+				}).on('error', function(e){
+				    console.log("Got an error: ", e);
+				    cb();
+				});
+			}, function(err){
+				if (err) console.log(err);
+				callback(err, results);
+			});
+		});
+	}
+
+	var savePredicatesToDataset = function(){
+		getDatasetsAndPredicates(function(err, results){
+			app.async.each(results, function(result, cb){
+				models.datasets.updatePredicates(result.dataset._id, result.predicates, function(err){
+					if (err) console.log(err);
+					cb();
+				});
+			}, function(err){
+				if (err) console.log(err);
+			});
+		});
+	}
+	// savePredicatesToDataset();
 }

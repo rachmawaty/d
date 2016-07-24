@@ -19,6 +19,14 @@ block content
                                 div.panel-collapse.collapse(id=category.idxName+"-"+child.idxName)
                                     if (child.datasets.length > 0)    
                                         div.panel-body
-                                            each dataset in child.datasets
-                                                a(href="#") #{dataset.label}
-                                                br
+                                            table.table.table-hover
+                                                thead
+                                                    tr
+                                                        th Title
+                                                        th Description
+                                                tbody
+                                                    each dataset in child.datasets
+                                                        tr
+                                                            td 
+                                                                a(href=dataset.sourceLink) #{dataset.label}
+                                                            td #{dataset.description}
