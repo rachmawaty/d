@@ -8,9 +8,12 @@ module.exports = function (app, models){
 	this.getAttributes = function(predicates){
 		var selects = " ?Subject";
 		app.async.each(predicates, function(predicate, cb){
-			var attr = " ?" + predicate.label;
-			selects += attr;
-			cb();
+			models.predicates.findByUri(predicate, function(err, pred){
+				if (err) console.log(err);
+				var attr = " ?" + pred.label;
+				selects += attr;
+				cb();
+			});
 		}, function(err){
 			if (err) console.log(err);
 			return selects;
@@ -25,8 +28,11 @@ module.exports = function (app, models){
 	this.getConditions = function(predicates, callback){
 		var cond = "";
 		app.async.each(predicates, function(predicate, cb){
-			cond += " ?Subject <" + predicate.uri + "> ?" + predicate.label + ".";
-			cb();
+			models.predicates.findByUri(predicate, function(err, pred){
+				if (err) console.log(err);
+				cond += " ?Subject <" + pred.uri + "> ?" + pred.label + ".";
+				cb();
+			});
 		}, function(err){
 			if (err) console.log(err);
 			return cond;
