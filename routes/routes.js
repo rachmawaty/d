@@ -2,7 +2,7 @@ var request = require('request');
 
 module.exports = function(app, models){
 	require('./misc')(app, models);
-	var query = require('./query')(app, models);
+	var queries = require('./query')(app, models);
 
 	var getCategoriesAndDatasets = function(callback){
 		models.categories.findByLevel(0, function(err, parent_categories){
@@ -41,42 +41,45 @@ module.exports = function(app, models){
 	};
 
 	var getTableData = function(callback){
-		var datasets = ["imd/score/health", "imd/score/education", "imd/score/environment"];
 		var results = [];
 		models.datasets.findAll(function(err, datasets){
 			app.async.each(datasets, function(dataset, cb_dt){
-				var namedGraph = "<http://localhost:8890/imd/rank/health>";
+				// var namedGraph = "<http://localhost:8890/imd/rank/health>";
 				// var query = "select distinct * where {graph "+ namedGraph +" {?s ?p ?o . FILTER regex(?o, 'manchester', 'i')} } order by ?s LIMIT 10";
 
-				var query = "select distinct ?s ?type ?label ?dataset ?refarea ?refperiod ?rank where "
-							+ " { graph " + namedGraph
-							+ " { ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type."
-							+ " ?s <http://www.w3.org/2000/01/rdf-schema#label> ?label."
-							+ " ?s <http://purl.org/linked-data/cube#dataSet> ?dataset."
-							+ " ?s <http://opendatacommunities.org/def/ontology/geography/refArea> ?refarea."
-							+ " ?s <http://opendatacommunities.org/def/ontology/time/refPeriod> ?refperiod."
-							+ " ?s <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank> ?rank."
-							+ " } } order by ?s limit 10";
-				var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
+				// var query = "select distinct ?s ?type ?label ?dataset ?refarea ?refperiod ?rank "
+				// 			+ " where { graph " + namedGraph
+				// 			+ " { ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type."
+				// 			+ " ?s <http://www.w3.org/2000/01/rdf-schema#label> ?label."
+				// 			+ " ?s <http://purl.org/linked-data/cube#dataSet> ?dataset."
+				// 			+ " ?s <http://opendatacommunities.org/def/ontology/geography/refArea> ?refarea."
+				// 			+ " ?s <http://opendatacommunities.org/def/ontology/time/refPeriod> ?refperiod."
+				// 			+ " ?s <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank> ?rank."
+				// 			+ " } } order by ?s limit 10";
+				queries.getTableQuery(dataset, function(err, query){
+					console.log(dataset.namedGraph);
+					var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
 
-				app.http.get(api, function(res){
-				    var body = '';
+					app.http.get(api, function(res){
+					    var body = '';
 
-				    res.on('data', function(chunk){
-				        body += chunk;
-				    });
+					    res.on('data', function(chunk){
+					        body += chunk;
+					    });
 
-				    res.on('end', function(){
-				        var dt = JSON.parse(body);
-				        dt.results.title = dataset.label;
-				        // console.log(namedGraph, dt.results)
-				        results.push(dt.results);
-				        cb_dt();
-				    });
-				}).on('error', function(e){
-				    console.log("Got an error: ", e);
-				    cb_dt();
+					    res.on('end', function(){
+					        var dt = JSON.parse(body);
+					        dt.results.title = dataset.label;
+					        // console.log(namedGraph, dt.results)
+					        results.push(dt.results);
+					        cb_dt();
+					    });
+					}).on('error', function(e){
+					    console.log("Got an error: ", e);
+					    cb_dt();
+					});
 				});
+				
 			}, function(err){
 				if (err) console.log(err);
 				// console.log("Last response: ", results.length, results[0].bindings[0]);
@@ -116,7 +119,6 @@ module.exports = function(app, models){
 				ds: results[1] 
 			});
 		});
-		
 	});
 
 	app.get('/datasets', function(req, res){

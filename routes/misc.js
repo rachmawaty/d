@@ -267,14 +267,14 @@ module.exports = function (app, models){
 		var predicates = [ {label: 'Type', uri:'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', prefix:"rdf", namespace:'http://www.w3.org/1999/02/22-rdf-syntax-ns#'},
 						  {label: 'Label', uri:'http://www.w3.org/2000/01/rdf-schema#label', prefix:"rdfs", namespace:'http://www.w3.org/2000/01/rdf-schema#'},
 						  {label: 'Dataset', uri:'http://purl.org/linked-data/cube#dataSet', prefix:"rdfs", namespace:''},
-						  {label: 'Ref Area', uri:'http://opendatacommunities.org/def/ontology/geography/refArea', prefix:"rdfs", namespace:''},
-						  {label: 'Ref Period', uri:'http://opendatacommunities.org/def/ontology/time/refPeriod', prefix:"rdfs", namespace:''},
-						  {label: 'Environment Rank', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
-						  {label: 'Health Rank', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
-						  {label: 'Health Score', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
-						  {label: 'Education Score', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
-						  {label: 'Education Rank', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
-						  {label: 'Environment Score', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'}
+						  {label: 'RefArea', uri:'http://opendatacommunities.org/def/ontology/geography/refArea', prefix:"rdfs", namespace:''},
+						  {label: 'RefPeriod', uri:'http://opendatacommunities.org/def/ontology/time/refPeriod', prefix:"rdfs", namespace:''},
+						  {label: 'EnvironmentRank', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'HealthRank', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'HealthScore', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'EducationScore', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'EducationRank', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'},
+						  {label: 'EnvironmentScore', uri:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore', prefix:"odcimd", namespace:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/'}
 						 ];
 	 	app.async.each(predicates, function(predicate, cb){
 			models.predicates.newPredicate(predicate.label, predicate.uri, predicate.prefix, predicate.namespace, function(err, predicate){

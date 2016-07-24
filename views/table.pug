@@ -7,7 +7,7 @@ div#table.tabcontent(style="height:480px;overflow:scroll;width=640px")
                     th Subject
                     th Type
                     th Label
-                    th Rank
+                    //- th Rank
                     th Dataset
                     th Reference Area
                     th Reference Period
@@ -15,16 +15,16 @@ div#table.tabcontent(style="height:480px;overflow:scroll;width=640px")
                 each triple in ds[0].bindings
                     tr
                         td
-                            a(href=triple.s.value) #{triple.s.value}
+                            a(href=triple.Subject.value) #{triple.Subject.value}
                         td 
-                            a(href=triple.type.value) #{triple.type.value}
+                            a(href=triple.Type.value) #{triple.Type.value}
                         td 
-                            a(href=triple.label.value) #{triple.label.value}
-                        td
+                            a(href=triple.Label.value) #{triple.Label.value}
+                        //- td
                             a(href=triple.rank.value) #{triple.rank.value}
                         td
-                            a(href=triple.dataset.value) #{triple.dataset.value}
+                            a(href=triple.Dataset.value) #{triple.Dataset.value}
                         td
-                            a(href=triple.refarea.value) #{triple.refarea.value}
+                            a(href=triple.RefArea.value) #{triple.RefArea.value}
                         td
-                            a(href=triple.refperiod.value) #{triple.refperiod.value}
+                            a(href=triple.RefPeriod.value) #{triple.RefPeriod.value}

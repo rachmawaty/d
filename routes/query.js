@@ -5,7 +5,7 @@ module.exports = function (app, models){
 				+" FILTER regex(?o, 'manchester', 'i')"
 				+" } "
 
-	this.getAttributes = function(predicates){
+	this.getAttributes = function(predicates, callback){
 		var selects = " ?Subject";
 		app.async.each(predicates, function(predicate, cb){
 			models.predicates.findByUri(predicate, function(err, pred){
@@ -16,35 +16,47 @@ module.exports = function (app, models){
 			});
 		}, function(err){
 			if (err) console.log(err);
-			return selects;
+			callback(err, selects);
 		});
 	}
 
-	this.getGraph = function(graphName){
-		var graph = " graph " + "<" + graphName + ">";
-		return graph;
-	}
-
 	this.getConditions = function(predicates, callback){
-		var cond = "";
+		var conds = "";
 		app.async.each(predicates, function(predicate, cb){
 			models.predicates.findByUri(predicate, function(err, pred){
 				if (err) console.log(err);
-				cond += " ?Subject <" + pred.uri + "> ?" + pred.label + ".";
+				conds += " ?Subject <" + pred.uri + "> ?" + pred.label + ".";
 				cb();
 			});
 		}, function(err){
 			if (err) console.log(err);
-			return cond;
+			callback(err, conds);
 		});
 	}
 
-	this.getTableQuery = function(dataset, needFilter){
-		var query = "select distinct" + this.getAttributes(dataset.predicates) 
-					+ " where {" + this.getGraph(dataset.graphName)
-					+ " {" + this.getConditions(dataset.predicates)
-					+ " } } order by ?Subject";
-		return query;
+	this.getTableQuery = function(dataset, callback){
+		app.async.parallel([
+			function(callback){
+				this.getAttributes(dataset.predicates, function(err, attrs){
+					// console.log(attrs);
+					callback(err, attrs);
+				});
+			}, function(callback){
+				this.getConditions(dataset.predicates, function(err, conds){
+					callback(err, conds);
+				});
+			}
+		], function(err, results){
+			if (err) console.log(error);
+			var graph = " graph " + "<" + dataset.namedGraph + ">";
+			console.log(graph);
+			var query = "select distinct" + results[0]
+					+ " where {" + graph
+					+ " {" + results[1]
+					+ " } } order by ?Subject limit 10";
+			// console.log(query);
+			callback(err, query);
+		});
 	}
 
 	return this;
