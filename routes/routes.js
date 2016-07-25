@@ -41,11 +41,10 @@ module.exports = function(app, models){
 	};
 
 	var getTableData = function(callback){
-		var results = [];
 		models.datasets.findAll(function(err, datasets){
+			var tempResults = [];
 			app.async.each(datasets, function(dataset, cb_dt){
 				queries.getTableQuery(dataset, function(err, query){
-					// console.log(dataset.namedGraph);
 					var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
 
 					app.http.get(api, function(res){
@@ -59,7 +58,7 @@ module.exports = function(app, models){
 					        var dt = JSON.parse(body);
 					        dt.results.title = dataset.label;
 					        dt.results.predicates = dataset.predicates;
-					        results.push(dt.results);
+					        tempResults.push(dt.results);
 					        cb_dt();
 					    });
 					}).on('error', function(e){
@@ -70,11 +69,44 @@ module.exports = function(app, models){
 				
 			}, function(err){
 				if (err) console.log(err);
-				// console.log("Last response: ", results.length, results[0].bindings[0]);
-				callback(err, results);
+				var results = [];
+				app.async.each(tempResults, function(tempResult, cb_temp){
+					var result = [];
+					result.title = tempResult.title;
+					result.rows = tempResult.bindings;
+		        	var attributes = [];
+		        	app.async.each(tempResult.predicates, function(predicateUri, cb_p){
+		        		var predicate = [];
+		        		models.predicates.getLabelByUri(predicateUri, function(err, predicateLabel){
+		        			if (err) console.log(err);
+		        			predicate.label = predicateLabel;
+		        			predicate.uri = predicateUri;
+		        			attributes.push(predicate);
+		        			cb_p();
+		        		});
+	        		}, function(err){
+	        			if (err) console.log(err);
+	        			
+	        			result.attributes = attributes;
+	        			results.push(result);
+	        			cb_temp();
+	        		});
+				}, function(err){
+					if (err) console.log(err);
+					callback(err, results);
+				});
 			});
 		});
 	};
+
+	// getTableData(function(err, results){
+	// 	app.async.each(results, function(result, cb_r){
+	// 		console.log("Last response: ", result.title, result.rows.length, result.attributes.length);
+	// 		cb_r();
+	// 	}, function(err){
+
+	// 	});
+	// });
 
 	var getMapData = function(){
 

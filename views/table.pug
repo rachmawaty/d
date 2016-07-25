@@ -25,27 +25,11 @@ div#table.tabcontent(style="height:480px;width:640px")
                             table.table.table-hover
                                 thead
                                     tr
-                                        th Subject
-                                        th Type
-                                        th Label
-                                        //- th Rank
-                                        th Dataset
-                                        th Reference Area
-                                        th Reference Period
+                                        each attr in table.attributes
+                                            th #{attr.label}
                                 tbody
-                                    each triple in table.bindings
+                                    each row in table.rows
                                         tr
-                                            td
-                                                a(href=triple.Subject.value) #{triple.Subject.value}
-                                            td 
-                                                a(href=triple.Type.value) #{triple.Type.value}
-                                            td 
-                                                a(href=triple.Label.value) #{triple.Label.value}
-                                            //- td
-                                                a(href=triple.rank.value) #{triple.rank.value}
-                                            td
-                                                a(href=triple.Dataset.value) #{triple.Dataset.value}
-                                            td
-                                                a(href=triple.RefArea.value) #{triple.RefArea.value}
-                                            td
-                                                a(href=triple.RefPeriod.value) #{triple.RefPeriod.value}
+                                            each attr in table.attributes
+                                                td
+                                                    a(href=row[attr.label].value) #{row[attr.label].value}
