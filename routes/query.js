@@ -49,7 +49,7 @@ module.exports = function (app, models){
 		], function(err, results){
 			if (err) console.log(error);
 			var graph = " graph " + "<" + dataset.namedGraph + ">";
-			console.log(graph);
+			// console.log(graph);
 			var query = "select distinct" + results[0]
 					+ " where {" + graph
 					+ " {" + results[1]

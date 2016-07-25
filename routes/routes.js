@@ -44,20 +44,8 @@ module.exports = function(app, models){
 		var results = [];
 		models.datasets.findAll(function(err, datasets){
 			app.async.each(datasets, function(dataset, cb_dt){
-				// var namedGraph = "<http://localhost:8890/imd/rank/health>";
-				// var query = "select distinct * where {graph "+ namedGraph +" {?s ?p ?o . FILTER regex(?o, 'manchester', 'i')} } order by ?s LIMIT 10";
-
-				// var query = "select distinct ?s ?type ?label ?dataset ?refarea ?refperiod ?rank "
-				// 			+ " where { graph " + namedGraph
-				// 			+ " { ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type."
-				// 			+ " ?s <http://www.w3.org/2000/01/rdf-schema#label> ?label."
-				// 			+ " ?s <http://purl.org/linked-data/cube#dataSet> ?dataset."
-				// 			+ " ?s <http://opendatacommunities.org/def/ontology/geography/refArea> ?refarea."
-				// 			+ " ?s <http://opendatacommunities.org/def/ontology/time/refPeriod> ?refperiod."
-				// 			+ " ?s <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank> ?rank."
-				// 			+ " } } order by ?s limit 10";
 				queries.getTableQuery(dataset, function(err, query){
-					console.log(dataset.namedGraph);
+					// console.log(dataset.namedGraph);
 					var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
 
 					app.http.get(api, function(res){
@@ -70,7 +58,7 @@ module.exports = function(app, models){
 					    res.on('end', function(){
 					        var dt = JSON.parse(body);
 					        dt.results.title = dataset.label;
-					        // console.log(namedGraph, dt.results)
+					        dt.results.predicates = dataset.predicates;
 					        results.push(dt.results);
 					        cb_dt();
 					    });

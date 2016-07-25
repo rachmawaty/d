@@ -1,30 +1,51 @@
-div#table.tabcontent(style="height:480px;overflow:scroll;width=640px")
+
+script.
+    $(document).ready(function() {
+        $('#example').DataTable({
+            "pageLength": 1,
+            "searching": false,
+            "ordering": false,
+            "lengthChange": false,
+            "scrollX": 480,
+            "scrollY": 640
+        });
+    } );
+
+div#table.tabcontent(style="height:480px;width:640px")
     if (ds)
-        h4 #{ds[0].title}
-        table.table.table-hover
+        table#example.display(style="width:100%")
             thead
                 tr
-                    th Subject
-                    th Type
-                    th Label
-                    //- th Rank
-                    th Dataset
-                    th Reference Area
-                    th Reference Period
+                    th
             tbody
-                each triple in ds[0].bindings
+                each table in ds
                     tr
                         td
-                            a(href=triple.Subject.value) #{triple.Subject.value}
-                        td 
-                            a(href=triple.Type.value) #{triple.Type.value}
-                        td 
-                            a(href=triple.Label.value) #{triple.Label.value}
-                        //- td
-                            a(href=triple.rank.value) #{triple.rank.value}
-                        td
-                            a(href=triple.Dataset.value) #{triple.Dataset.value}
-                        td
-                            a(href=triple.RefArea.value) #{triple.RefArea.value}
-                        td
-                            a(href=triple.RefPeriod.value) #{triple.RefPeriod.value}
+                            h4 #{table.title}
+                            table.table.table-hover
+                                thead
+                                    tr
+                                        th Subject
+                                        th Type
+                                        th Label
+                                        //- th Rank
+                                        th Dataset
+                                        th Reference Area
+                                        th Reference Period
+                                tbody
+                                    each triple in table.bindings
+                                        tr
+                                            td
+                                                a(href=triple.Subject.value) #{triple.Subject.value}
+                                            td 
+                                                a(href=triple.Type.value) #{triple.Type.value}
+                                            td 
+                                                a(href=triple.Label.value) #{triple.Label.value}
+                                            //- td
+                                                a(href=triple.rank.value) #{triple.rank.value}
+                                            td
+                                                a(href=triple.Dataset.value) #{triple.Dataset.value}
+                                            td
+                                                a(href=triple.RefArea.value) #{triple.RefArea.value}
+                                            td
+                                                a(href=triple.RefPeriod.value) #{triple.RefPeriod.value}
