@@ -34,27 +34,34 @@ module.exports = function (app, models){
 		});
 	}
 
+	this.getAttributesAndConditions = function(predicates, callback){
+		var attrs = " ?Subject";
+		var conds = "";
+		var result = [];
+		app.async.each(predicates, function(predicate, cb){
+			models.predicates.findByUri(predicate, function(err, pred){
+				if (err) console.log(err);
+				var attr = " ?" + pred.label;
+				attrs += attr;
+				conds += " ?Subject <" + pred.uri + "> ?" + pred.label + ".";
+				cb();
+			});
+		}, function(err){
+			if (err) console.log(err);
+			result.attrs = attrs;
+			result.conds = conds;
+			callback(err, result);
+		});
+	}
+
 	this.getTableQuery = function(dataset, callback){
-		app.async.parallel([
-			function(callback){
-				this.getAttributes(dataset.predicates, function(err, attrs){
-					// console.log(attrs);
-					callback(err, attrs);
-				});
-			}, function(callback){
-				this.getConditions(dataset.predicates, function(err, conds){
-					callback(err, conds);
-				});
-			}
-		], function(err, results){
+		this.getAttributesAndConditions(dataset.predicates, function(err, result){
 			if (err) console.log(error);
 			var graph = " graph " + "<" + dataset.namedGraph + ">";
-			// console.log(graph);
-			var query = "select distinct" + results[0]
+			var query = "select distinct" + result.attrs
 					+ " where {" + graph
-					+ " {" + results[1]
+					+ " {" + result.conds
 					+ " } } order by ?Subject limit 10";
-			// console.log(query);
 			callback(err, query);
 		});
 	}
