@@ -54,6 +54,7 @@ module.exports = function (app, models){
 		});
 	}
 
+	// this.getTableQuery = function(dataset, regexFilter, limit, callback){
 	this.getTableQuery = function(dataset, callback){
 		this.getAttributesAndConditions(dataset.predicates, function(err, result){
 			if (err) console.log(error);

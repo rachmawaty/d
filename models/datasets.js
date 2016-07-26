@@ -13,7 +13,12 @@ module.exports = function(mongoose) {
 		hasLocation: Boolean,
 		locationId: ObjectId,
 		description: String,
-		predicates: Array
+		predicates: Array,
+		chartAttrs: {
+			xaxis: String,
+			yaxis: String
+		},
+		locationAttr: String
 	});
 
 	var model = mongoose.model(collection, schema);

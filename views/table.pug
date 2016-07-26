@@ -1,7 +1,7 @@
 
 script.
     $(document).ready(function() {
-        $('#example').DataTable({
+        $('#tabledataset').DataTable({
             "pageLength": 1,
             "searching": false,
             "ordering": false,
@@ -13,7 +13,7 @@ script.
 
 div#table.tabcontent(style="height:480px;width:640px")
     if (ds)
-        table#example.display(style="width:100%")
+        table#tabledataset.display(style="width:100%")
             thead
                 tr
                     th
