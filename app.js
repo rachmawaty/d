@@ -16,6 +16,9 @@ app.mongoose.connect('mongodb://localhost:27017/dapp');
 // app.n3 = require('n3');
 // app.rdfstore = require('rdfstore');
 
+/*** visualisation ***/
+app.plotly = require('plotly')("rachmawaty", "7x4q8r5vid");
+
 app.http = require('http');
 
 app.dir = __dirname;

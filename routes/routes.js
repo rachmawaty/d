@@ -126,8 +126,17 @@ module.exports = function(app, models){
 
 	};
 
-	var getChartData = function(){
-
+	var getChartData = function(params, callback){
+		var tempResults = [];
+		app.async.each(params, function(param, cb_dt){
+			models.datasets.findByIdxName(param, function(err, dataset){
+				if (err) console.log(err);
+				cb_dt();
+			});
+		}, function(err){
+			if (err) console.log(err);
+			callback(err, 'a');
+		});
 	};
 
 	app.get('/home', function(req, res){
@@ -135,23 +144,41 @@ module.exports = function(app, models){
 	});
 
 	app.get('/', function(req, res){
-		var datasets = req.query.dataset;
+		var params = req.query.dataset;
 		app.async.parallel([
 			function(callback){
 				getCategoriesAndDatasets(function(err, categories){
 					callback(err, categories);
 				});
 			}, function(callback){
-				getTableData(datasets, function(err, results){
-					callback(err, results);
+				isDataset(params, function(err, datasets){
+					getTableData(datasets, function(err, results){
+						callback(err, results);
+					});
 				});
+			}, function(callback){
+				var trace1 = {
+				  x: ["giraffes", "orangutans", "monkeys"],
+				  y: [20, 14, 23],
+				  name: "SF Zoo",
+				  type: "bar"
+				};
+				var trace2 = {
+				  x: ["giraffes", "orangutans", "monkeys"],
+				  y: [12, 18, 29],
+				  name: "LA Zoo",
+				  type: "bar"
+				};
+				var data = [trace1, trace2];
+				callback(null, data);
 			}
 		], function(err, results){
 			if (err) console.log(error);
 			res.render('visualisation.pug', { 
 				active: "home", 
 				categories: results[0],
-				ds: results[1] 
+				ds: results[1],
+				data: JSON.stringify(results[2])
 			});
 		});
 	});
@@ -170,27 +197,21 @@ module.exports = function(app, models){
 		res.render('index.pug', { active:"about" });
 	});
 
-	app.get('/filter', function(req, res){
-		var params = req.query.dataset;
-		app.async.parallel([
-			function(callback){
-				getCategoriesAndDatasets(function(err, categories){
-					callback(err, categories);
-				});
-			}, function(callback){
-				isDataset(params, function(err, datasets){
-					getTableData(datasets, function(err, results){
-						callback(err, results);
-					});
-				});
-			}
-		], function(err, results){
-			if (err) console.log(error);
-			res.render('visualisation.pug', { 
-				active: "home", 
-				categories: results[0],
-				ds: results[1] 
-			});
-		});
+	app.get('/chart', function(req, res){
+		var trace1 = {
+		  x: ["giraffes", "orangutans", "monkeys"],
+		  y: [20, 14, 23],
+		  name: "SF Zoo",
+		  type: "bar"
+		};
+		var trace2 = {
+		  x: ["giraffes", "orangutans", "monkeys"],
+		  y: [12, 18, 29],
+		  name: "LA Zoo",
+		  type: "bar"
+		};
+		var data = [trace1, trace2];
+
+		res.render('chart.pug', { data: JSON.stringify(data), active:"about" });
 	});
 }

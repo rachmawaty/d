@@ -1,7 +1,7 @@
 div.panel-collapse.collapse(id=category.idxName+"-"+child.idxName)
     if (child.datasets.length > 0)    
         div.panel-body
-            form(action="/filter", method="get")
+            form(action="/", method="get")
                 each dataset in child.datasets
                     input(type="checkbox", name="dataset" value=dataset.idxName)
                     span 

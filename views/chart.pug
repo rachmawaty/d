@@ -1,37 +1,13 @@
-script(type="text/javascript", src="https://www.gstatic.com/charts/loader.js")
-script.
-	google.charts.load("current", {packages:['corechart']});
-	google.charts.setOnLoadCallback(drawChart);
-
-	function drawChart() {
-		var data = google.visualization.arrayToDataTable([
-			["Area", "Rank", { role: "style" } ],
-			["Manchester A", 894, "#b87333"],
-			["Mamchester B", 1049, "silver"],
-			["Manchester C", 1930, "gold"],
-			["Manchester D", 2145, "color: #e5e4e2"]
-		]);
-
-		var view = new google.visualization.DataView(data);
-		view.setColumns([0, 1, 
-						{ calc: "stringify",
-						sourceColumn: 1,
-						type: "string",
-						role: "annotation" },
-						2]);
-
-		var options = {
-			//title: "Deprivation Rank",
-			width: 600,
-			height: 400,
-			bar: {groupWidth: "95%"},
-			legend: { position: "none" },
-		};
-		
-		var chart = new google.visualization.ColumnChart(document.getElementById("columnchart_values"));
-		chart.draw(view, options);
-	}
+script(src='https://cdn.plot.ly/plotly-latest.min.js')
 
 div#chart.tabcontent
-	h4 Chart Title
-	div#columnchart_values(style="width: 900px; height: 300px;")
+	h4 Chart
+	div(id='dashboard', style='width:640px')
+
+script.
+	var data = !{data};
+	console.log("active #{active} " + data);
+
+	var layout = {barmode: 'group'};
+
+	Plotly.newPlot('dashboard', data, layout);
