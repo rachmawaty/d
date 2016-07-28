@@ -356,4 +356,142 @@ module.exports = function (app, models){
 		});
 	}
 	// savePredicatesToDataset();
+
+	var addChartPredicates = function(){
+		var list = [ {name:'imd-rank-environment',
+						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank'}
+						},
+						{name:'imd-rank-health',
+						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank'}
+						},
+						{name:'imd-score-health',
+						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore'}
+						}, 
+						{name:'imd-score-education',
+						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore'}
+						}, 
+						{name:'imd-rank-education',
+						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank'}
+						}, 
+						{name:'imd-score-environment',
+						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore'}
+						}];
+	 	app.async.each(list, function(ds, cb){
+			models.datasets.findByIdxName(ds.name, function(err, dataset){
+				if (dataset) {
+					models.datasets.updateChartAttributes(dataset._id, ds.chart, function(err){
+						if (err) console.log(err);
+						cb();
+					});
+				} else {
+					cb();
+				}
+			});
+		}, function(err){
+			if (err) console.log(err);
+		});
+	}
+	// addChartPredicates();
+
+	var queries = require('./query')(app, models);
+	var getChartData = function(params, callback){
+		var tempResults = [];
+		app.async.each(params, function(param, cb_dt){
+			models.datasets.findByIdxName(param, function(err, dataset){
+				if (dataset){
+					queries.getChartQuery(dataset, function(err, query){
+						var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
+
+						app.http.get(api, function(res){
+						    var body = '';
+
+						    res.on('data', function(chunk){
+						        body += chunk;
+						    });
+
+						    res.on('end', function(){
+						        var dt = JSON.parse(body);
+						        dt.results.title = dataset.label;
+						        dt.results.chartAttributes = dataset.chartAttributes;
+						        tempResults.push(dt.results);
+						        cb_dt();
+						    });
+						}).on('error', function(e){
+						    console.log("Got an error: ", e);
+						    cb_dt();
+						});
+					});
+				} else {
+					cb_dt();
+				}
+			});
+		}, function(err){
+			if (err) console.log(err);
+			var results = [];
+			app.async.each(tempResults, function(tempResult, cb_temp){
+				var result = {};
+				result.name = tempResult.title;
+				result.type = "bar";
+				result.x = [];
+				result.y = [];
+				app.async.each(tempResult.bindings, function(row, cb_row){
+					app.async.parallel([
+						function(callback){
+							models.predicates.getLabelByUri(tempResult.chartAttributes.x, function(err, xlabel){
+								// console.log(row[label].value);
+								callback(err, row[xlabel].value);
+							});
+						}, function(callback){
+							models.predicates.getLabelByUri(tempResult.chartAttributes.y, function(err, ylabel){
+								// console.log(row[label].value);
+								callback(err, row[ylabel].value);
+							});
+						}
+					], function(err, res){
+						if (err) console.log(err);
+						result.x.push(res[0]);
+						result.y.push(res[1]);
+						cb_row();
+					});
+				}, function(err){
+					if (err) console.log(err);
+					// console.log("tmp", result);
+					results.push(result);
+					cb_temp();
+				});
+			}, function(err){
+				if (err) console.log(err);
+				// console.log("grr", results);
+				callback(err, results);
+			});
+		});
+	};
+
+	var isDataset = function(param, callback){
+		models.datasets.findByIdxName(param, function(err, dataset){
+			if (dataset) {
+				var params = [];
+				params.push(param);
+				callback(err, params);
+			} else {
+				callback(err, param);
+			}
+		});
+	}
+
+	var cheers = function(params){
+		isDataset(params, function(err, datasets){
+			getChartData(datasets, function(err, results){
+				if (err) console.log(err);
+				console.log(results);
+			});
+		});
+	}
+	// cheers('imd-score-health');
 }

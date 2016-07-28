@@ -8,15 +8,16 @@ module.exports = function(mongoose) {
 		label: String,
 		idxName: String,
 		sourceLink: String,
+		description: String,
 		namedGraph: String,
 		categoryId: ObjectId,
 		hasLocation: Boolean,
 		locationId: ObjectId,
 		description: String,
 		predicates: Array,
-		chartAttrs: {
-			xaxis: String,
-			yaxis: String
+		chartAttributes: {
+			x: String,
+			y: String
 		},
 		locationAttr: String
 	});
@@ -47,6 +48,25 @@ module.exports = function(mongoose) {
 			if (err) console.log(err);
 			callback(err, datasets);
 		});
+	};
+
+	model.getChartAttributes = function(datasetId, callback) {
+		model.findOne({_id: datasetId}, function(err, dataset) {
+			callback(err, dataset.chartAttributes);
+		});
+	};
+
+	model.updateChartAttributes = function(id, chartAttributes, callback) {
+		var conditions = {_id: id}
+	        , update = { $set: { 
+	        	chartAttributes: chartAttributes
+	        }}
+	        , options = { multi: false };
+        model.update(conditions, update, options, function (err, numAffected) {
+          if(err) console.log(err);
+          console.log(numAffected + 'updated');
+          callback(err);
+        });
 	};
 
 	model.updateDescription = function(id, description, callback) {

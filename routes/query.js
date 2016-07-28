@@ -67,5 +67,20 @@ module.exports = function (app, models){
 		});
 	}
 
+	this.getChartQuery = function(dataset, callback){
+		var attrs = [dataset.chartAttributes.x, dataset.chartAttributes.y];
+		this.getAttributesAndConditions(attrs, function(err, result){
+			if (err) console.log(error);
+			var graph = " graph " + "<" + dataset.namedGraph + ">";
+			var query = "select distinct" + result.attrs
+					+ " where {" + graph
+					+ " {" + result.conds
+					+ " } } order by ?Subject limit 10";
+			callback(err, query);
+		});
+	}
+
+
+
 	return this;
 }

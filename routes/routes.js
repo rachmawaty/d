@@ -114,14 +114,6 @@ module.exports = function(app, models){
 		});
 	};
 
-	// getTableData(function(err, results){
-	// 	app.async.each(results, function(result, cb_r){
-	// 		console.log("Last response: ", result.title, result.rows.length, result.attributes.length);
-	// 		cb_r();
-	// 	}, function(err){
-	// 	});
-	// });
-
 	var getMapData = function(){
 
 	};
@@ -130,12 +122,72 @@ module.exports = function(app, models){
 		var tempResults = [];
 		app.async.each(params, function(param, cb_dt){
 			models.datasets.findByIdxName(param, function(err, dataset){
-				if (err) console.log(err);
-				cb_dt();
+				if (dataset){
+					queries.getChartQuery(dataset, function(err, query){
+						var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
+
+						app.http.get(api, function(res){
+						    var body = '';
+
+						    res.on('data', function(chunk){
+						        body += chunk;
+						    });
+
+						    res.on('end', function(){
+						        var dt = JSON.parse(body);
+						        dt.results.title = dataset.label;
+						        dt.results.chartAttributes = dataset.chartAttributes;
+						        tempResults.push(dt.results);
+						        cb_dt();
+						    });
+						}).on('error', function(e){
+						    console.log("Got an error: ", e);
+						    cb_dt();
+						});
+					});
+				} else {
+					cb_dt();
+				}
 			});
 		}, function(err){
 			if (err) console.log(err);
-			callback(err, 'a');
+			var results = [];
+			app.async.each(tempResults, function(tempResult, cb_temp){
+				var result = {};
+				result.name = tempResult.title;
+				result.type = "bar";
+				result.x = [];
+				result.y = [];
+				app.async.each(tempResult.bindings, function(row, cb_row){
+					app.async.parallel([
+						function(callback){
+							models.predicates.getLabelByUri(tempResult.chartAttributes.x, function(err, xlabel){
+								// console.log(row[label].value);
+								callback(err, row[xlabel].value);
+							});
+						}, function(callback){
+							models.predicates.getLabelByUri(tempResult.chartAttributes.y, function(err, ylabel){
+								// console.log(row[label].value);
+								callback(err, row[ylabel].value);
+							});
+						}
+					], function(err, res){
+						if (err) console.log(err);
+						result.x.push(res[0]);
+						result.y.push(res[1]);
+						cb_row();
+					});
+				}, function(err){
+					if (err) console.log(err);
+					// console.log("tmp", result);
+					results.push(result);
+					cb_temp();
+				});
+			}, function(err){
+				if (err) console.log(err);
+				// console.log("grr", results);
+				callback(err, results);
+			});
 		});
 	};
 
@@ -157,20 +209,13 @@ module.exports = function(app, models){
 					});
 				});
 			}, function(callback){
-				var trace1 = {
-				  x: ["giraffes", "orangutans", "monkeys"],
-				  y: [20, 14, 23],
-				  name: "SF Zoo",
-				  type: "bar"
-				};
-				var trace2 = {
-				  x: ["giraffes", "orangutans", "monkeys"],
-				  y: [12, 18, 29],
-				  name: "LA Zoo",
-				  type: "bar"
-				};
-				var data = [trace1, trace2];
-				callback(null, data);
+				isDataset(params, function(err, datasets){
+					getChartData(datasets, function(err, results){
+						if (err) console.log(err);
+						console.log(results);
+						callback(err, results);
+					});
+				});
 			}
 		], function(err, results){
 			if (err) console.log(error);
