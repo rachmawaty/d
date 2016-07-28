@@ -358,28 +358,52 @@ module.exports = function (app, models){
 	// savePredicatesToDataset();
 
 	var addChartPredicates = function(){
+		// var list = [ {name:'imd-rank-environment',
+		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank'}
+		// 				},
+		// 				{name:'imd-rank-health',
+		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank'}
+		// 				},
+		// 				{name:'imd-score-health',
+		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore'}
+		// 				}, 
+		// 				{name:'imd-score-education',
+		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore'}
+		// 				}, 
+		// 				{name:'imd-rank-education',
+		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank'}
+		// 				}, 
+		// 				{name:'imd-score-environment',
+		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore'}
+		// 				}];
 		var list = [ {name:'imd-rank-environment',
-						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
 						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank'}
 						},
 						{name:'imd-rank-health',
-						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
 						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank'}
 						},
 						{name:'imd-score-health',
-						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
 						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore'}
 						}, 
 						{name:'imd-score-education',
-						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
 						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore'}
 						}, 
 						{name:'imd-rank-education',
-						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
 						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank'}
 						}, 
 						{name:'imd-score-environment',
-						  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
+						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
 						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore'}
 						}];
 	 	app.async.each(list, function(ds, cb){
