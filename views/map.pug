@@ -5,7 +5,29 @@ script.
 			center: {lat: 53.483959, lng: -2.244644},
 			zoom: 11
 		});
+
+		var contentString = '<div id="content">'+
+		'<div id="siteNotice">'+
+		'</div>'+
+		'<h1 id="firstHeading" class="firstHeading">Uluru</h1>'+
+		'<div id="bodyContent">'+'<p><b>Uluru</b>'
+		+'(last visited June 22, 2009).</p>'+
+		'</div>'+'</div>';
+
+		var infowindow = new google.maps.InfoWindow({ content: contentString });
+
+		var marker = new google.maps.Marker({
+			position: {lat: 53.47055, lng: -2.20851},
+			map: map, 
+			title: 'BOO'
+		});
+
+		marker.addListener('click', function() {
+			infowindow.open(map, marker);
+		});
 	}
+
+	
 
 script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcV5xnVZ71OOdC16XB7I3zwU9FuiLyFOc&callback=initMap")
 

@@ -53,7 +53,7 @@ module.exports = function(app, models){
 	}
 
 	var getTableData = function(params, callback){
-		var tempResults = [];
+		var results = [];
 		app.async.each(params, function(param, cb_dt){
 			models.datasets.findByIdxName(param, function(err, dataset){
 				if (dataset){
@@ -70,8 +70,9 @@ module.exports = function(app, models){
 						    res.on('end', function(){
 						        var dt = JSON.parse(body);
 						        dt.results.title = dataset.label;
-						        dt.results.predicates = dataset.predicates;
-						        tempResults.push(dt.results);
+						        dt.results.rows = dt.results.bindings;
+						        dt.results.attributes = dt.head.vars;
+						        results.push(dt.results);
 						        cb_dt();
 						    });
 						}).on('error', function(e){
@@ -85,32 +86,7 @@ module.exports = function(app, models){
 			});
 		}, function(err){
 			if (err) console.log(err);
-			var results = [];
-			app.async.each(tempResults, function(tempResult, cb_temp){
-				var result = [];
-				result.title = tempResult.title;
-				result.rows = tempResult.bindings;
-	        	var attributes = [];
-	        	app.async.each(tempResult.predicates, function(predicateUri, cb_p){
-	        		var predicate = [];
-	        		models.predicates.getLabelByUri(predicateUri, function(err, predicateLabel){
-	        			if (err) console.log(err);
-	        			predicate.label = predicateLabel;
-	        			predicate.uri = predicateUri;
-	        			attributes.push(predicate);
-	        			cb_p();
-	        		});
-        		}, function(err){
-        			if (err) console.log(err);
-        			
-        			result.attributes = attributes;
-        			results.push(result);
-        			cb_temp();
-        		});
-			}, function(err){
-				if (err) console.log(err);
-				callback(err, results);
-			});
+			callback(err, results);
 		});
 	};
 
@@ -136,7 +112,7 @@ module.exports = function(app, models){
 						    res.on('end', function(){
 						        var dt = JSON.parse(body);
 						        dt.results.title = dataset.label;
-						        dt.results.chartAttributes = dataset.chartAttributes;
+						        dt.results.attributes = dt.head.vars;
 						        tempResults.push(dt.results);
 						        cb_dt();
 						    });
@@ -159,33 +135,16 @@ module.exports = function(app, models){
 				result.x = [];
 				result.y = [];
 				app.async.each(tempResult.bindings, function(row, cb_row){
-					app.async.parallel([
-						function(callback){
-							models.predicates.getLabelByUri(tempResult.chartAttributes.x, function(err, xlabel){
-								// console.log(row[label].value);
-								callback(err, row[xlabel].value);
-							});
-						}, function(callback){
-							models.predicates.getLabelByUri(tempResult.chartAttributes.y, function(err, ylabel){
-								// console.log(row[label].value);
-								callback(err, row[ylabel].value);
-							});
-						}
-					], function(err, res){
-						if (err) console.log(err);
-						result.x.push(res[0]);
-						result.y.push(res[1]);
-						cb_row();
-					});
+					result.x.push(row[tempResult.attributes[1]].value);
+					result.y.push(row[tempResult.attributes[2]].value);
+					cb_row();
 				}, function(err){
 					if (err) console.log(err);
-					// console.log("tmp", result);
 					results.push(result);
 					cb_temp();
 				});
 			}, function(err){
 				if (err) console.log(err);
-				// console.log("grr", results);
 				callback(err, results);
 			});
 		});
@@ -212,7 +171,6 @@ module.exports = function(app, models){
 				isDataset(params, function(err, datasets){
 					getChartData(datasets, function(err, results){
 						if (err) console.log(err);
-						console.log(results);
 						callback(err, results);
 					});
 				});
@@ -239,24 +197,6 @@ module.exports = function(app, models){
 	});
 
 	app.get('/about', function(req, res){
-		res.render('index.pug', { active:"about" });
-	});
-
-	app.get('/chart', function(req, res){
-		var trace1 = {
-		  x: ["giraffes", "orangutans", "monkeys"],
-		  y: [20, 14, 23],
-		  name: "SF Zoo",
-		  type: "bar"
-		};
-		var trace2 = {
-		  x: ["giraffes", "orangutans", "monkeys"],
-		  y: [12, 18, 29],
-		  name: "LA Zoo",
-		  type: "bar"
-		};
-		var data = [trace1, trace2];
-
-		res.render('chart.pug', { data: JSON.stringify(data), active:"about" });
+		res.render('about.pug', { active:"about" });
 	});
 }

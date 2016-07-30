@@ -6,12 +6,12 @@ script.
             "searching": false,
             "ordering": false,
             "lengthChange": false,
-            "scrollX": 480,
-            "scrollY": 640
+            "scrollX": 720,
+            "scrollY": 480
         });
     } );
 
-div#table.tabcontent(style="height:480px;width:640px")
+div#table.tabcontent
     if (ds)
         table#tabledataset.display(style="width:100%")
             thead
@@ -26,10 +26,10 @@ div#table.tabcontent(style="height:480px;width:640px")
                                 thead
                                     tr
                                         each attr in table.attributes
-                                            th #{attr.label}
+                                            th #{attr}
                                 tbody
                                     each row in table.rows
                                         tr
                                             each attr in table.attributes
                                                 td
-                                                    a(href=row[attr.label].value) #{row[attr.label].value}
+                                                    a(href=row[attr].value) #{row[attr].value}

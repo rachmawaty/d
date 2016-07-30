@@ -1,9 +1,9 @@
 module.exports = function (app, models){
 
-	this.filter = " { select distinct ?Subject"
+	var filter = " { select distinct ?Subject"
 				+" where {?Subject ?p ?o ."
 				+" FILTER regex(?o, 'manchester', 'i')"
-				+" } "
+				+" } } "
 
 	this.getAttributes = function(predicates, callback){
 		var selects = " ?Subject";
@@ -62,6 +62,7 @@ module.exports = function (app, models){
 			var query = "select distinct" + result.attrs
 					+ " where {" + graph
 					+ " {" + result.conds
+					+ filter
 					+ " } } order by ?Subject limit 10";
 			callback(err, query);
 		});
@@ -75,6 +76,7 @@ module.exports = function (app, models){
 			var query = "select distinct" + result.attrs
 					+ " where {" + graph
 					+ " {" + result.conds
+					+ filter
 					+ " } } order by ?Subject limit 10";
 			callback(err, query);
 		});

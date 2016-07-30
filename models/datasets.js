@@ -12,14 +12,16 @@ module.exports = function(mongoose) {
 		namedGraph: String,
 		categoryId: ObjectId,
 		hasLocation: Boolean,
-		locationId: ObjectId,
 		description: String,
 		predicates: Array,
 		chartAttributes: {
 			x: String,
 			y: String
 		},
-		locationAttr: String
+		mapAttributes: {
+			loc: String,
+			info: String
+		}
 	});
 
 	var model = mongoose.model(collection, schema);
@@ -108,11 +110,11 @@ module.exports = function(mongoose) {
         });
 	};
 
-	model.updateLocation = function(id, hasLocation, locationId, callback) {
+	model.updateLocation = function(id, _hasLocation, _loc, _info, callback) {
         var conditions = {_id: id}
 	        , update = { $set: { 
-	        	hasLocation: hasLocation,
-	        	locationId: locationId
+	        	hasLocation: _hasLocation,
+	        	mapAttributes: {loc: _loc, info: _info}
 	        }}
 	        , options = { multi: false };
         model.update(conditions, update, options, function (err, numAffected) {

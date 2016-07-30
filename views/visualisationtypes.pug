@@ -57,7 +57,8 @@ div.col-md-9
                                 li#litable.litabs
                                     a.tablinks(href="#", onclick="openTab(event, 'table')") Table
 
-                            include chart.pug
+                            div(style="overflow:scroll")
+                                include chart.pug
 
                             include map.pug
 

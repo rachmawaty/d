@@ -357,7 +357,7 @@ module.exports = function (app, models){
 	}
 	// savePredicatesToDataset();
 
-	var addChartPredicates = function(){
+	var addChartAttributes = function(){
 		// var list = [ {name:'imd-rank-environment',
 		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
 		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank'}
@@ -421,7 +421,7 @@ module.exports = function (app, models){
 			if (err) console.log(err);
 		});
 	}
-	// addChartPredicates();
+	// addChartAttributes();
 
 	var queries = require('./query')(app, models);
 	var getChartData = function(params, callback){
@@ -442,6 +442,7 @@ module.exports = function (app, models){
 						    res.on('end', function(){
 						        var dt = JSON.parse(body);
 						        dt.results.title = dataset.label;
+						        console.log(dt.head.vars);
 						        dt.results.chartAttributes = dataset.chartAttributes;
 						        tempResults.push(dt.results);
 						        cb_dt();
@@ -467,6 +468,7 @@ module.exports = function (app, models){
 				app.async.each(tempResult.bindings, function(row, cb_row){
 					app.async.parallel([
 						function(callback){
+							// you do not need this, you could just get the header
 							models.predicates.getLabelByUri(tempResult.chartAttributes.x, function(err, xlabel){
 								// console.log(row[label].value);
 								callback(err, row[xlabel].value);
@@ -518,4 +520,29 @@ module.exports = function (app, models){
 		});
 	}
 	// cheers('imd-score-health');
+
+	var addLocation = function(){
+		var list = [ {name:'imd-rank-environment', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank'},
+					 {name:'imd-rank-health', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank'},
+					 {name:'imd-score-health', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore'},
+					 {name:'imd-score-education', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore'},
+					 {name:'imd-rank-education', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank'},
+					 {name:'imd-rank-education', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore'}
+					];
+	 	app.async.each(list, function(ds, cb){
+			models.datasets.findByIdxName(ds.name, function(err, dataset){
+				if (dataset) {
+					models.datasets.updateLocation(dataset._id, true, ds.loc, ds.info, function(err){
+						if (err) console.log(err);
+						cb();
+					});
+				} else {
+					cb();
+				}
+			});
+		}, function(err){
+			if (err) console.log(err);
+		});
+	}
+	// addLocation();
 }
