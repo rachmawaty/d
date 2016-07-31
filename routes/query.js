@@ -82,7 +82,25 @@ module.exports = function (app, models){
 		});
 	}
 
-
+	this.getMapQuery = function(namedGraph, callback){
+		var queryString = "select distinct ?s ?refarea ?rank ?labelarea ?long ?lat"
+						+ " from <http://localhost:8890/imd/rank/health>"
+						+ " from <http://localhost:8890/location/lsoa>"
+						+ " where {"
+						+ " 	?s <http://opendatacommunities.org/def/ontology/geography/refArea> ?refarea."
+						+ " 	?s <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank> ?rank."
+						+ " ?refarea <http://www.w3.org/2000/01/rdf-schema#label> ?labelarea."
+						+ " ?refarea <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long."
+						+ " ?refarea <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat."
+						+ " {"
+						+ " select distinct *"
+						+ " where { ?s ?p ?o"
+						+ " FILTER regex(?o, 'manchester', 'i')"
+						+ " }"
+						+ " 	}" 
+						+ " } order by ?s limit 25"
+		callback(null, queryString);
+	}
 
 	return this;
 }

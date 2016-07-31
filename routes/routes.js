@@ -90,8 +90,31 @@ module.exports = function(app, models){
 		});
 	};
 
-	var getMapData = function(){
+	var getMapData = function(callback){
+		queries.getMapQuery("", function(err, query){
+			var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
 
+			app.http.get(api, function(res){
+			    var body = '';
+
+			    res.on('data', function(chunk){
+			        body += chunk;
+			    });
+
+			    res.on('end', function(){
+			        var dt = JSON.parse(body);
+			        // dt.results.title = dataset.label;
+			        dt.results.attributes = dt.head.vars;
+			        console.log(dt.head.vars);
+			        // tempResults.push(dt.results);
+			        // cb_dt();
+			        callback(err, dt.results);
+			    });
+			}).on('error', function(e){
+			    console.log("Got an error: ", e);
+			    // cb_dt();
+			});
+		});
 	};
 
 	var getChartData = function(params, callback){
@@ -170,9 +193,12 @@ module.exports = function(app, models){
 			}, function(callback){
 				isDataset(params, function(err, datasets){
 					getChartData(datasets, function(err, results){
-						if (err) console.log(err);
 						callback(err, results);
 					});
+				});
+			}, function(callback){
+				getMapData(function(err, results){
+					callback(err, results);
 				});
 			}
 		], function(err, results){
@@ -181,7 +207,8 @@ module.exports = function(app, models){
 				active: "home", 
 				categories: results[0],
 				ds: results[1],
-				data: JSON.stringify(results[2])
+				data: JSON.stringify(results[2]),
+				mapdata: results[3]
 			});
 		});
 	});

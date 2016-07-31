@@ -468,14 +468,11 @@ module.exports = function (app, models){
 				app.async.each(tempResult.bindings, function(row, cb_row){
 					app.async.parallel([
 						function(callback){
-							// you do not need this, you could just get the header
 							models.predicates.getLabelByUri(tempResult.chartAttributes.x, function(err, xlabel){
-								// console.log(row[label].value);
 								callback(err, row[xlabel].value);
 							});
 						}, function(callback){
 							models.predicates.getLabelByUri(tempResult.chartAttributes.y, function(err, ylabel){
-								// console.log(row[label].value);
 								callback(err, row[ylabel].value);
 							});
 						}
@@ -487,13 +484,11 @@ module.exports = function (app, models){
 					});
 				}, function(err){
 					if (err) console.log(err);
-					// console.log("tmp", result);
 					results.push(result);
 					cb_temp();
 				});
 			}, function(err){
 				if (err) console.log(err);
-				// console.log("grr", results);
 				callback(err, results);
 			});
 		});
