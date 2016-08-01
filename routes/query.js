@@ -82,23 +82,27 @@ module.exports = function (app, models){
 		});
 	}
 
-	this.getMapQuery = function(namedGraph, callback){
-		var queryString = "select distinct ?s ?refarea ?rank ?labelarea ?long ?lat"
+	this.getQuery = function(namedGraph, callback){
+		var queryString = " select distinct ?Subject ?Type ?Label ?Dataset ?RefPeriod ?RefArea ?Area ?Rank ?Longitude ?Latitude"
 						+ " from <http://localhost:8890/imd/rank/health>"
 						+ " from <http://localhost:8890/location/lsoa>"
 						+ " where {"
-						+ " 	?s <http://opendatacommunities.org/def/ontology/geography/refArea> ?refarea."
-						+ " 	?s <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank> ?rank."
-						+ " ?refarea <http://www.w3.org/2000/01/rdf-schema#label> ?labelarea."
-						+ " ?refarea <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long."
-						+ " ?refarea <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat."
+						+ " ?Subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?Type."
+						+ " ?Subject <http://www.w3.org/2000/01/rdf-schema#label> ?Label."
+						+ " ?Subject <http://purl.org/linked-data/cube#dataSet> ?Dataset."
+						+ " ?Subject <http://opendatacommunities.org/def/ontology/time/refPeriod> ?RefPeriod."
+						+ " ?Subject <http://opendatacommunities.org/def/ontology/geography/refArea> ?RefArea."
+						+ " ?Subject <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank> ?Rank."
+						+ " ?RefArea <http://www.w3.org/2000/01/rdf-schema#label> ?Area."
+						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?Longitude."
+						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?Latitude."
 						+ " {"
-						+ " select distinct *"
-						+ " where { ?s ?p ?o"
+						+ " select distinct ?Subject"
+						+ " where { ?Subject ?p ?o"
 						+ " FILTER regex(?o, 'manchester', 'i')"
 						+ " }"
 						+ " 	}" 
-						+ " } order by ?s limit 25"
+						+ " } order by ?Subject limit 10"
 		callback(null, queryString);
 	}
 

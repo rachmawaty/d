@@ -358,30 +358,6 @@ module.exports = function (app, models){
 	// savePredicatesToDataset();
 
 	var addChartAttributes = function(){
-		// var list = [ {name:'imd-rank-environment',
-		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
-		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank'}
-		// 				},
-		// 				{name:'imd-rank-health',
-		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
-		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank'}
-		// 				},
-		// 				{name:'imd-score-health',
-		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
-		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore'}
-		// 				}, 
-		// 				{name:'imd-score-education',
-		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
-		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore'}
-		// 				}, 
-		// 				{name:'imd-rank-education',
-		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
-		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank'}
-		// 				}, 
-		// 				{name:'imd-score-environment',
-		// 				  chart:{x:'http://www.w3.org/2000/01/rdf-schema#label',
-		// 				   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore'}
-		// 				}];
 		var list = [ {name:'imd-rank-environment',
 						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
 						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank'}
@@ -516,18 +492,18 @@ module.exports = function (app, models){
 	}
 	// cheers('imd-score-health');
 
-	var addLocation = function(){
-		var list = [ {name:'imd-rank-environment', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank'},
-					 {name:'imd-rank-health', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank'},
-					 {name:'imd-score-health', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore'},
-					 {name:'imd-score-education', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore'},
-					 {name:'imd-rank-education', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank'},
-					 {name:'imd-rank-education', loc:'http://opendatacommunities.org/def/ontology/geography/refArea', info:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore'}
+	var updateLocation = function(){
+		var list = [ {name:'imd-rank-environment', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-rank-education', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-rank-health', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-score-environment', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-score-education', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-score-health', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
 					];
 	 	app.async.each(list, function(ds, cb){
 			models.datasets.findByIdxName(ds.name, function(err, dataset){
 				if (dataset) {
-					models.datasets.updateLocation(dataset._id, true, ds.loc, ds.info, function(err){
+					models.datasets.updateLocation(dataset._id, true, ds.long, ds.lat, ds.information, function(err){
 						if (err) console.log(err);
 						cb();
 					});
@@ -539,5 +515,5 @@ module.exports = function (app, models){
 			if (err) console.log(err);
 		});
 	}
-	// addLocation();
+	// updateLocation();
 }

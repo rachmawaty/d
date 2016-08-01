@@ -1,4 +1,6 @@
 script.
+	var mapdata = !{mapdata};
+
 	var map;
 	function initMap() {
 		map = new google.maps.Map(document.getElementById('map'), {
@@ -16,6 +18,26 @@ script.
 
 		var infowindow = new google.maps.InfoWindow({ content: contentString });
 
+		//- for (var i = 0; i<mapdata.length; i++){
+		//- 	for (var j = 0; j<mapdata[i].rows.length; j++){
+		//- 		var longitude = Number(mapdata[i].rows[j]['Longitude'].value);
+		//- 		var latitude = Number(mapdata[i].rows[j]['Latitude'].value);
+				
+		//- 		var infowindow = new google.maps.InfoWindow({ content: contentString });
+
+		//- 		var marker = new google.maps.Marker({
+		//- 			position: {lat: longitude, lng: latitude},
+		//- 			title: 'BOO'
+		//- 		});
+
+		//- 		marker.addListener('click', function() {
+		//- 			infowindow.open(map, marker);
+		//- 		});
+
+		//- 		marker.setMap(map);
+		//- 	}
+		//- }
+
 		var marker = new google.maps.Marker({
 			position: {lat: 53.47055, lng: -2.20851},
 			map: map, 
@@ -25,9 +47,8 @@ script.
 		marker.addListener('click', function() {
 			infowindow.open(map, marker);
 		});
-	}
 
-	
+	}
 
 script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcV5xnVZ71OOdC16XB7I3zwU9FuiLyFOc&callback=initMap")
 

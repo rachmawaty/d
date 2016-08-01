@@ -52,12 +52,12 @@ module.exports = function(app, models){
 		});
 	}
 
-	var getTableData = function(params, callback){
+	var getData = function(params, callback){
 		var results = [];
 		app.async.each(params, function(param, cb_dt){
 			models.datasets.findByIdxName(param, function(err, dataset){
 				if (dataset){
-					queries.getTableQuery(dataset, function(err, query){
+					queries.getQuery(dataset, function(err, query){
 						var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
 
 						app.http.get(api, function(res){
@@ -91,7 +91,7 @@ module.exports = function(app, models){
 	};
 
 	var getMapData = function(callback){
-		queries.getMapQuery("", function(err, query){
+		queries.getQuery("", function(err, query){
 			var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
 
 			app.http.get(api, function(res){
@@ -105,7 +105,7 @@ module.exports = function(app, models){
 			        var dt = JSON.parse(body);
 			        // dt.results.title = dataset.label;
 			        dt.results.attributes = dt.head.vars;
-			        console.log(dt.head.vars);
+			        // console.log(dt.head.vars);
 			        // tempResults.push(dt.results);
 			        // cb_dt();
 			        callback(err, dt.results);
@@ -186,7 +186,7 @@ module.exports = function(app, models){
 				});
 			}, function(callback){
 				isDataset(params, function(err, datasets){
-					getTableData(datasets, function(err, results){
+					getData(datasets, function(err, results){
 						callback(err, results);
 					});
 				});
@@ -196,10 +196,6 @@ module.exports = function(app, models){
 						callback(err, results);
 					});
 				});
-			}, function(callback){
-				getMapData(function(err, results){
-					callback(err, results);
-				});
 			}
 		], function(err, results){
 			if (err) console.log(error);
@@ -208,7 +204,7 @@ module.exports = function(app, models){
 				categories: results[0],
 				ds: results[1],
 				data: JSON.stringify(results[2]),
-				mapdata: results[3]
+				mapdata: JSON.stringify(results[1])
 			});
 		});
 	});

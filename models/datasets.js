@@ -15,13 +15,15 @@ module.exports = function(mongoose) {
 		description: String,
 		predicates: Array,
 		chartAttributes: {
-			x: String,
-			y: String
+			x: String, //header
+			y: String //header
 		},
 		mapAttributes: {
-			loc: String,
-			info: String
-		}
+			long: String,
+			lat: String,
+			information: String
+		},
+		query: String
 	});
 
 	var model = mongoose.model(collection, schema);
@@ -84,6 +86,20 @@ module.exports = function(mongoose) {
         });
 	};
 
+	model.updateLocation = function(id, _hasLocation, _long, _lat, _info, callback) {
+        var conditions = {_id: id}
+	        , update = { $set: { 
+	        	hasLocation: _hasLocation,
+	        	mapAttributes: {long: _long, lat: _lat, information: _info}
+	        }}
+	        , options = { multi: false };
+        model.update(conditions, update, options, function (err, numAffected) {
+          if(err) console.log(err);
+          console.log(numAffected + 'updated');
+          callback(err);
+        });
+	};
+
 	model.updatePredicates = function(id, predicates, callback) {
         var conditions = {_id: id}
 	        , update = { $set: { 
@@ -110,11 +126,10 @@ module.exports = function(mongoose) {
         });
 	};
 
-	model.updateLocation = function(id, _hasLocation, _loc, _info, callback) {
+	model.updateQuery = function(id, query, callback) {
         var conditions = {_id: id}
 	        , update = { $set: { 
-	        	hasLocation: _hasLocation,
-	        	mapAttributes: {loc: _loc, info: _info}
+	        	query: query
 	        }}
 	        , options = { multi: false };
         model.update(conditions, update, options, function (err, numAffected) {
@@ -122,7 +137,7 @@ module.exports = function(mongoose) {
           console.log(numAffected + 'updated');
           callback(err);
         });
-	};
+	};	
 
 	model.newDataset = function(label, idxName, sourceLink, namedGraph, categoryId, callback ) {
 		var dataset = new model ({
@@ -132,7 +147,6 @@ module.exports = function(mongoose) {
 			sourceLink: sourceLink,
 			namedGraph: namedGraph,
 			categoryId: categoryId,
-			hasLocation: false,
 			description: "Default description"
 	    });
 
