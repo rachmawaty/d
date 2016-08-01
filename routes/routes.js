@@ -203,7 +203,7 @@ module.exports = function(app, models){
 			}
 		], function(err, results){
 			if (err) console.log(error);
-			res.render('visualisation.pug', { 
+			res.render('index.pug', { 
 				active: "home", 
 				categories: results[0],
 				ds: results[1],
