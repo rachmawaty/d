@@ -8,46 +8,40 @@ script.
 			zoom: 11
 		});
 
-		var contentString = '<div id="content">'+
-		'<div id="siteNotice">'+
-		'</div>'+
-		'<h1 id="firstHeading" class="firstHeading">Uluru</h1>'+
-		'<div id="bodyContent">'+'<p><b>Uluru</b>'
-		+'(last visited June 22, 2009).</p>'+
-		'</div>'+'</div>';
-
-		var infowindow = new google.maps.InfoWindow({ content: contentString });
-
+		var bounds = new google.maps.LatLngBounds();
+		var mapOptions = {
+			mapTypeId: 'roadmap'
+		};
+		
 		//- for (var i = 0; i<mapdata.length; i++){
-		//- 	for (var j = 0; j<mapdata[i].rows.length; j++){
-		//- 		var longitude = Number(mapdata[i].rows[j]['Longitude'].value);
-		//- 		var latitude = Number(mapdata[i].rows[j]['Latitude'].value);
-				
-		//- 		var infowindow = new google.maps.InfoWindow({ content: contentString });
+		var contents = [];
+		var infoWindow = new google.maps.InfoWindow(), marker, i;
+		for (var i = 0; i<mapdata[0].rows.length; i++){
+			var content = '<div class="info_content">' +
+						'<h3>'+mapdata[0].rows[i]['Area'].value+'</h3>'+
+						'<p>'+mapdata[0].title + ": " + 
+						mapdata[0].rows[i]['Rank'].value+'</p></div>';
+			contents.push(content);
+			var longitude = Number(mapdata[0].rows[i]['Longitude'].value);
+			var latitude = Number(mapdata[0].rows[i]['Latitude'].value);
+			var _position = new google.maps.LatLng(latitude, longitude);
+			var _title = mapdata[0].rows[i]['Area'].value;
+			bounds.extend(_position);
+			marker = new google.maps.Marker({
+			    position: _position,
+			    map: map,
+			    title: _title
+			});
 
-		//- 		var marker = new google.maps.Marker({
-		//- 			position: {lat: longitude, lng: latitude},
-		//- 			title: 'BOO'
-		//- 		});
-
-		//- 		marker.addListener('click', function() {
-		//- 			infowindow.open(map, marker);
-		//- 		});
-
-		//- 		marker.setMap(map);
-		//- 	}
+			// Allow each marker to have an info window    
+			google.maps.event.addListener(marker, 'click', (function(marker, i) {
+			    return function() {
+			        infoWindow.setContent(contents[i]);
+			        infoWindow.open(map, marker);
+			    }
+			})(marker, i));
+		}
 		//- }
-
-		var marker = new google.maps.Marker({
-			position: {lat: 53.47055, lng: -2.20851},
-			map: map, 
-			title: 'BOO'
-		});
-
-		marker.addListener('click', function() {
-			infowindow.open(map, marker);
-		});
-
 	}
 
 script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcV5xnVZ71OOdC16XB7I3zwU9FuiLyFOc&callback=initMap")
