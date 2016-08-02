@@ -57,7 +57,8 @@ module.exports = function(app, models){
 		app.async.each(params, function(param, cb_dt){
 			models.datasets.findByIdxName(param, function(err, dataset){
 				if (dataset){
-					queries.getQuery(dataset, function(err, query){
+					models.datasets.getQuery(dataset._id, function(err, query){
+						if (err) console.log(err);
 						var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
 
 						app.http.get(api, function(res){
@@ -87,33 +88,6 @@ module.exports = function(app, models){
 		}, function(err){
 			if (err) console.log(err);
 			callback(err, results);
-		});
-	};
-
-	var getMapData = function(callback){
-		queries.getQuery("", function(err, query){
-			var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
-
-			app.http.get(api, function(res){
-			    var body = '';
-
-			    res.on('data', function(chunk){
-			        body += chunk;
-			    });
-
-			    res.on('end', function(){
-			        var dt = JSON.parse(body);
-			        // dt.results.title = dataset.label;
-			        dt.results.attributes = dt.head.vars;
-			        // console.log(dt.head.vars);
-			        // tempResults.push(dt.results);
-			        // cb_dt();
-			        callback(err, dt.results);
-			    });
-			}).on('error', function(e){
-			    console.log("Got an error: ", e);
-			    // cb_dt();
-			});
 		});
 	};
 

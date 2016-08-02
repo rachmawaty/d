@@ -496,9 +496,9 @@ module.exports = function (app, models){
 		var list = [ {name:'imd-rank-environment', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
 					{name:'imd-rank-education', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
 					{name:'imd-rank-health', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
-					{name:'imd-score-environment', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
-					{name:'imd-score-education', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
-					{name:'imd-score-health', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-score-environment', long: 'Longitude', lat: 'Latitude', information: 'Score'},
+					{name:'imd-score-education', long: 'Longitude', lat: 'Latitude', information: 'Score'},
+					{name:'imd-score-health', long: 'Longitude', lat: 'Latitude', information: 'Score'},
 					];
 	 	app.async.each(list, function(ds, cb){
 			models.datasets.findByIdxName(ds.name, function(err, dataset){
@@ -516,4 +516,46 @@ module.exports = function (app, models){
 		});
 	}
 	// updateLocation();
+
+	var updateQuery = function(){
+		var queryString = " select distinct ?Subject ?Type ?Label ?Dataset ?RefPeriod ?RefArea ?Area ?Rank ?Longitude ?Latitude"
+						+ " from <http://localhost:8890/imd/score/health>"
+						+ " from <http://localhost:8890/location/lsoa>"
+						+ " where {"
+						+ " ?Subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?Type."
+						+ " ?Subject <http://www.w3.org/2000/01/rdf-schema#label> ?Label."
+						+ " ?Subject <http://purl.org/linked-data/cube#dataSet> ?Dataset."
+						+ " ?Subject <http://opendatacommunities.org/def/ontology/time/refPeriod> ?RefPeriod."
+						+ " ?Subject <http://opendatacommunities.org/def/ontology/geography/refArea> ?RefArea."
+						+ " ?Subject <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore> ?Score."
+						+ " ?RefArea <http://www.w3.org/2000/01/rdf-schema#label> ?Area."
+						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?Longitude."
+						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?Latitude."
+						+ " {"
+						+ " select distinct ?Subject"
+						+ " where { ?Subject ?p ?o"
+						+ " FILTER regex(?o, 'manchester', 'i')"
+						+ " }"
+						+ " 	}" 
+						+ " } order by ?Subject";
+		models.datasets.findByIdxName('imd-score-health', function(err, dataset){
+			models.datasets.updateQuery(dataset._id, queryString, function(err){
+				if (err) console.log(err);
+			});
+		});
+	}
+	// updateQuery();
+
+	var getQueries = function(){
+		models.datasets.findAll(function(err, datasets){
+			app.async.each(datasets, function(dataset, cb){
+				console.log(dataset.idxName);
+				console.log(dataset.query);
+				cb();
+			}, function(err){
+				if (err) console.log(err);
+			});
+		});
+	}
+	// getQueries();
 }

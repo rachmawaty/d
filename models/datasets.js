@@ -60,6 +60,12 @@ module.exports = function(mongoose) {
 		});
 	};
 
+	model.getQuery = function(datasetId, callback) {
+		model.findOne({_id: datasetId}, function(err, dataset) {
+			callback(err, dataset.query);
+		});
+	};
+
 	model.updateChartAttributes = function(id, chartAttributes, callback) {
 		var conditions = {_id: id}
 	        , update = { $set: { 

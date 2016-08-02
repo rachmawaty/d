@@ -102,7 +102,7 @@ module.exports = function (app, models){
 						+ " FILTER regex(?o, 'manchester', 'i')"
 						+ " }"
 						+ " 	}" 
-						+ " } order by ?Subject limit 10"
+						+ " } order by ?Subject limit 10";
 		callback(null, queryString);
 	}
 
