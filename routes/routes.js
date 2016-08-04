@@ -70,6 +70,7 @@ module.exports = function(app, models){
 
 						    res.on('end', function(){
 						        var dt = JSON.parse(body);
+						        dt.results.dataId = dataset._id;
 						        dt.results.title = dataset.label;
 						        dt.results.rows = dt.results.bindings;
 						        dt.results.attributes = dt.head.vars;
@@ -87,61 +88,28 @@ module.exports = function(app, models){
 			});
 		}, function(err){
 			if (err) console.log(err);
-			callback(err, results);
-		});
-	};
-
-	var getChartData = function(params, callback){
-		var tempResults = [];
-		app.async.each(params, function(param, cb_dt){
-			models.datasets.findByIdxName(param, function(err, dataset){
-				if (dataset){
-					queries.getChartQuery(dataset, function(err, query){
-						var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
-
-						app.http.get(api, function(res){
-						    var body = '';
-
-						    res.on('data', function(chunk){
-						        body += chunk;
-						    });
-
-						    res.on('end', function(){
-						        var dt = JSON.parse(body);
-						        dt.results.title = dataset.label;
-						        dt.results.attributes = dt.head.vars;
-						        tempResults.push(dt.results);
-						        cb_dt();
-						    });
-						}).on('error', function(e){
-						    console.log("Got an error: ", e);
-						    cb_dt();
-						});
+			var chartData = [];
+			app.async.each(results, function(result, cb_temp){
+				var chart = {};
+				chart.name = result.title;
+				chart.type = "bar";
+				chart.x = [];
+				chart.y = [];
+				app.async.each(result.bindings, function(row, cb_row){
+					models.datasets.getChartAttributes(result.dataId, function(err, attrs){
+						if (err) console.log(err);
+						chart.x.push(row[attrs.x].value);
+						chart.y.push(row[attrs.y].value);
+						cb_row();
 					});
-				} else {
-					cb_dt();
-				}
-			});
-		}, function(err){
-			if (err) console.log(err);
-			var results = [];
-			app.async.each(tempResults, function(tempResult, cb_temp){
-				var result = {};
-				result.name = tempResult.title;
-				result.type = "bar";
-				result.x = [];
-				result.y = [];
-				app.async.each(tempResult.bindings, function(row, cb_row){
-					result.x.push(row[tempResult.attributes[1]].value);
-					result.y.push(row[tempResult.attributes[2]].value);
-					cb_row();
 				}, function(err){
 					if (err) console.log(err);
-					results.push(result);
+					chartData.push(chart);
 					cb_temp();
 				});
 			}, function(err){
 				if (err) console.log(err);
+				results.chartData = chartData;
 				callback(err, results);
 			});
 		});
@@ -164,12 +132,6 @@ module.exports = function(app, models){
 						callback(err, results);
 					});
 				});
-			}, function(callback){
-				isDataset(params, function(err, datasets){
-					getChartData(datasets, function(err, results){
-						callback(err, results);
-					});
-				});
 			}
 		], function(err, results){
 			if (err) console.log(error);
@@ -177,7 +139,7 @@ module.exports = function(app, models){
 				active: "home", 
 				categories: results[0],
 				ds: results[1],
-				data: JSON.stringify(results[2]),
+				data: JSON.stringify(results[1].chartData),
 				mapdata: JSON.stringify(results[1])
 			});
 		});
@@ -195,5 +157,9 @@ module.exports = function(app, models){
 
 	app.get('/about', function(req, res){
 		res.render('about.pug', { active:"about" });
+	});
+
+	app.get('/endpoint', function(req, res){
+		res.render('endpoint.pug', { active:"endpoint" });
 	});
 }

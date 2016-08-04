@@ -399,6 +399,48 @@ module.exports = function (app, models){
 	}
 	// addChartAttributes();
 
+	var addChartAttributesV2 = function(){
+		var list = [ {name:'imd-rank-environment',
+						  chart:{x:'Area',
+						   y:'Rank'}
+						},
+						{name:'imd-rank-health',
+						  chart:{x:'Area',
+						   y:'Rank'}
+						},
+						{name:'imd-rank-education',
+						  chart:{x:'Area',
+						   y:'Rank'}
+						},
+						{name:'imd-score-environment',
+						  chart:{x:'Area',
+						   y:'Score'}
+						},
+						{name:'imd-score-health',
+						  chart:{x:'Area',
+						   y:'Score'}
+						},
+						{name:'imd-score-education',
+						  chart:{x:'Area',
+						   y:'Score'}
+						}];
+	 	app.async.each(list, function(ds, cb){
+			models.datasets.findByIdxName(ds.name, function(err, dataset){
+				if (dataset) {
+					models.datasets.updateChartAttributes(dataset._id, ds.chart, function(err){
+						if (err) console.log(err);
+						cb();
+					});
+				} else {
+					cb();
+				}
+			});
+		}, function(err){
+			if (err) console.log(err);
+		});
+	}
+	// addChartAttributesV2();
+
 	var queries = require('./query')(app, models);
 	var getChartData = function(params, callback){
 		var tempResults = [];
@@ -518,8 +560,8 @@ module.exports = function (app, models){
 	// updateLocation();
 
 	var updateQuery = function(){
-		var queryString = " select distinct ?Subject ?Type ?Label ?Dataset ?RefPeriod ?RefArea ?Area ?Rank ?Longitude ?Latitude"
-						+ " from <http://localhost:8890/imd/score/health>"
+		var queryString = " select distinct ?Subject ?Type ?Label ?Dataset ?RefPeriod ?RefArea ?Area ?Score ?Longitude ?Latitude"
+						+ " from <http://localhost:8890/imd/score/environment>"
 						+ " from <http://localhost:8890/location/lsoa>"
 						+ " where {"
 						+ " ?Subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?Type."
@@ -527,7 +569,7 @@ module.exports = function (app, models){
 						+ " ?Subject <http://purl.org/linked-data/cube#dataSet> ?Dataset."
 						+ " ?Subject <http://opendatacommunities.org/def/ontology/time/refPeriod> ?RefPeriod."
 						+ " ?Subject <http://opendatacommunities.org/def/ontology/geography/refArea> ?RefArea."
-						+ " ?Subject <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore> ?Score."
+						+ " ?Subject <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore> ?Score."
 						+ " ?RefArea <http://www.w3.org/2000/01/rdf-schema#label> ?Area."
 						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?Longitude."
 						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?Latitude."
@@ -538,7 +580,7 @@ module.exports = function (app, models){
 						+ " }"
 						+ " 	}" 
 						+ " } order by ?Subject";
-		models.datasets.findByIdxName('imd-score-health', function(err, dataset){
+		models.datasets.findByIdxName('imd-score-environment', function(err, dataset){
 			models.datasets.updateQuery(dataset._id, queryString, function(err){
 				if (err) console.log(err);
 			});
@@ -558,4 +600,18 @@ module.exports = function (app, models){
 		});
 	}
 	// getQueries();
+
+	var asda = function(){
+		models.datasets.findAll(function(err, datasets){
+			app.async.each(datasets, function(dataset, cb){
+				models.datasets.getChartAttributes(dataset._id, function(err, attrs){
+					console.log(attrs.x, attrs.y);
+					cb();
+				});
+			}, function(err){
+
+			});
+		});
+	}
+	// asda();
 }

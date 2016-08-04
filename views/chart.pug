@@ -7,6 +7,7 @@ div#chart.tabcontent(style="width:1280px")
 script.
 	var data = !{data};
 
-	var layout = {barmode: 'group'};
+	var layout = {barmode: 'group', title: 'Chart Title', 
+				xaxis: {title: 'X'}, yaxis: {title: 'Y'}, height:720, width:1280, margin: {b: 200} };
 
 	Plotly.newPlot('dashboard', data, layout);
