@@ -19,6 +19,7 @@ module.exports = function(mongoose) {
 			y: String //header
 		},
 		mapAttributes: {
+			refArea: String,
 			long: String,
 			lat: String,
 			information: String
@@ -92,11 +93,11 @@ module.exports = function(mongoose) {
         });
 	};
 
-	model.updateLocation = function(id, _hasLocation, _long, _lat, _info, callback) {
+	model.updateLocation = function(id, _hasLocation, _refArea, _long, _lat, _info, callback) {
         var conditions = {_id: id}
 	        , update = { $set: { 
 	        	hasLocation: _hasLocation,
-	        	mapAttributes: {long: _long, lat: _lat, information: _info}
+	        	mapAttributes: {refArea: _refArea, long: _long, lat: _lat, information: _info}
 	        }}
 	        , options = { multi: false };
         model.update(conditions, update, options, function (err, numAffected) {
@@ -123,6 +124,19 @@ module.exports = function(mongoose) {
         var conditions = {_id: id}
 	        , update = { $set: { 
 	        	sourceLink: sourceLink
+	        }}
+	        , options = { multi: false };
+        model.update(conditions, update, options, function (err, numAffected) {
+          if(err) console.log(err);
+          console.log(numAffected + 'updated');
+          callback(err);
+        });
+	};
+
+	model.updateNamedGraphByIdxName = function(idxName, namedGraph, callback) {
+        var conditions = {idxName: idxName}
+	        , update = { $set: { 
+	        	namedGraph: namedGraph
 	        }}
 	        , options = { multi: false };
         model.update(conditions, update, options, function (err, numAffected) {

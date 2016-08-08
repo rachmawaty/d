@@ -72,6 +72,8 @@ module.exports = function(app, models){
 						        var dt = JSON.parse(body);
 						        dt.results.dataId = dataset._id;
 						        dt.results.title = dataset.label;
+						        dt.results.chartAttributes = dataset.chartAttributes;
+						        dt.results.mapAttributes = dataset.mapAttributes;
 						        dt.results.rows = dt.results.bindings;
 						        dt.results.attributes = dt.head.vars;
 						        results.push(dt.results);
@@ -96,12 +98,9 @@ module.exports = function(app, models){
 				chart.x = [];
 				chart.y = [];
 				app.async.each(result.bindings, function(row, cb_row){
-					models.datasets.getChartAttributes(result.dataId, function(err, attrs){
-						if (err) console.log(err);
-						chart.x.push(row[attrs.x].value);
-						chart.y.push(row[attrs.y].value);
-						cb_row();
-					});
+					chart.x.push(row[result.chartAttributes.x].value);
+					chart.y.push(row[result.chartAttributes.y].value);
+					cb_row();
 				}, function(err){
 					if (err) console.log(err);
 					chartData.push(chart);
@@ -121,6 +120,8 @@ module.exports = function(app, models){
 
 	app.get('/', function(req, res){
 		var params = req.query.dataset;
+		var categoryparam = req.query.category;
+		console.log(categoryparam);
 		app.async.parallel([
 			function(callback){
 				getCategoriesAndDatasets(function(err, categories){
@@ -132,6 +133,25 @@ module.exports = function(app, models){
 						callback(err, results);
 					});
 				});
+			}, function(callback){
+				var split = categoryparam ? categoryparam.split("-") : "";
+				console.log(split);
+				var title = "";
+				app.async.eachSeries(split, function(idxName, cb){
+					models.categories.findByIdxName(idxName, function(err, category){
+						if (err) console.log(err);
+						var label = category.label + " ";
+						title += label;
+						cb();
+					});
+				}, function(err){
+					if (err) console.log(err);
+					var charts = {};
+					charts.title = title;
+					charts.xaxis = "Area";
+					charts.yaxis = title.split(" ")[1];
+					callback(err, charts);
+				});
 			}
 		], function(err, results){
 			if (err) console.log(error);
@@ -140,7 +160,9 @@ module.exports = function(app, models){
 				categories: results[0],
 				ds: results[1],
 				data: JSON.stringify(results[1].chartData),
-				mapdata: JSON.stringify(results[1])
+				mapdata: JSON.stringify(results[1]),
+				charts: JSON.stringify(results[2]),
+				cat: categoryparam
 			});
 		});
 	});

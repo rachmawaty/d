@@ -357,48 +357,6 @@ module.exports = function (app, models){
 	}
 	// savePredicatesToDataset();
 
-	var addChartAttributes = function(){
-		var list = [ {name:'imd-rank-environment',
-						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
-						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentRank'}
-						},
-						{name:'imd-rank-health',
-						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
-						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthRank'}
-						},
-						{name:'imd-score-health',
-						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
-						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHealthScore'}
-						}, 
-						{name:'imd-score-education',
-						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
-						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationScore'}
-						}, 
-						{name:'imd-rank-education',
-						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
-						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEducationRank'}
-						}, 
-						{name:'imd-score-environment',
-						  chart:{x:'http://opendatacommunities.org/def/ontology/geography/refArea',
-						   y:'http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore'}
-						}];
-	 	app.async.each(list, function(ds, cb){
-			models.datasets.findByIdxName(ds.name, function(err, dataset){
-				if (dataset) {
-					models.datasets.updateChartAttributes(dataset._id, ds.chart, function(err){
-						if (err) console.log(err);
-						cb();
-					});
-				} else {
-					cb();
-				}
-			});
-		}, function(err){
-			if (err) console.log(err);
-		});
-	}
-	// addChartAttributes();
-
 	var addChartAttributesV2 = function(){
 		var list = [ {name:'imd-rank-environment',
 						  chart:{x:'Area',
@@ -601,17 +559,39 @@ module.exports = function (app, models){
 	}
 	// getQueries();
 
-	var asda = function(){
-		models.datasets.findAll(function(err, datasets){
-			app.async.each(datasets, function(dataset, cb){
-				models.datasets.getChartAttributes(dataset._id, function(err, attrs){
-					console.log(attrs.x, attrs.y);
-					cb();
-				});
-			}, function(err){
+	var addNewDatasets = function(){
+		var insertedDatasets = [
+		{label: 'Income', idxName: 'imd-rank-income', sourceLink: 'http://opendatacommunities.org/data/societal-wellbeing/deprivation/imd-income-rank-2010', namedGraph:'http://localhost:8890/imd/rank/income', categoryId: '5789373a1822f78f17a12be9'}, 
+		{label: 'Income', idxName: 'imd-score-income', sourceLink: 'http://opendatacommunities.org/data/societal-wellbeing/deprivation/imd-income-score-2010', namedGraph:'http://localhost:8890/imd/score/income', categoryId: '5789373a1822f78f17a12bea'}];
 
+		for(var i=0;i<insertedDatasets.length;i++){
+			var label = insertedDatasets[i].label;
+			var idxName = insertedDatasets[i].idxName;
+			var sourceLink = insertedDatasets[i].sourceLink;
+			var namedGraph = insertedDatasets[i].namedGraph;
+			var categoryId = insertedDatasets[i].categoryId;
+			// console.log(insertedCategories[i]);
+			models.datasets.newDataset(label, idxName, sourceLink, namedGraph, categoryId, function(err, dset){
+				console.log(dset);
 			});
-		});
+		}
 	}
-	// asda();
+	// addNewDatasets();
+
+	var updateNamedGraphs = function(){
+		var insertedDatasets = [
+		{idxName: 'imd-rank-crime', namedGraph:'http://localhost:8890/imd/rank/crime'}, 
+		{idxName: 'imd-rank-employment', namedGraph:'http://localhost:8890/imd/rank/employment'},
+		{idxName: 'imd-rank-housing', namedGraph:'http://localhost:8890/imd/rank/housing'}];
+
+		for(var i=0;i<insertedDatasets.length;i++){
+			var idxName = insertedDatasets[i].idxName;
+			var namedGraph = insertedDatasets[i].namedGraph;
+			// console.log(insertedCategories[i]);
+			models.datasets.updateNamedGraphByIdxName(idxName, namedGraph, function(err, dset){
+				console.log(dset);
+			});
+		}
+	}
+	// updateNamedGraphs();
 }

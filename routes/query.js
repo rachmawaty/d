@@ -3,7 +3,10 @@ module.exports = function (app, models){
 	var filter = " { select distinct ?Subject"
 				+" where {?Subject ?p ?o ."
 				+" FILTER regex(?o, 'manchester', 'i')"
-				+" } } "
+				+" } } ";
+	var selectAllGraphs = "SELECT DISTINCT ?namedgraph ?label"
+							+" WHERE { GRAPH ?namedgraph { ?s ?p ?o } }"
+							+" ORDER BY ?namedgraph";
 
 	this.getAttributes = function(predicates, callback){
 		var selects = " ?Subject";

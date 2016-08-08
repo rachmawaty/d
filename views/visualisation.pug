@@ -40,28 +40,70 @@ script.
         document.getElementById(litab).className += " active";
     }
 
+    function selectTab(event, menutabname) {
+        // Declare all variables
+        var i, menucontent, menulinks, menutabs;
+        var menutab = "menu" + menutabname;
+
+        // Get all elements with class="tabcontent" and hide them
+        menucontent = document.getElementsByClassName("menucontent");
+        for (i = 0; i < menucontent.length; i++) {
+            menucontent[i].style.display = "none";
+        }
+
+        // Get all elements with class="tablinks" and remove the class "active"
+        menulinks = document.getElementsByClassName("menulinks");
+        for (i = 0; i < menulinks.length; i++) {
+            menulinks[i].className = menulinks[i].className.replace(" active", "");
+        }
+
+        menutabs = document.getElementsByClassName("menutabs");
+        for (i = 0; i < menutabs.length; i++) {
+            menutabs[i].className = menutabs[i].className.replace(" active", "");
+        }
+
+        // Show the current tab, and add an "active" class to the link that opened the tab
+        document.getElementById(menutabname).style.display = "block";
+        event.currentTarget.className += " active";
+        document.getElementById(menutab).className += " active";
+    }
+
 div.col-md-9
+    //- ul.nav.nav-tabs
+    //-     li#menuvis.menutabs
+    //-         a.menulinks(href="#", onclick="selectTab(event, 'vis')")
     p.lead
         b Visualisation
-    div.row.carousel-holder
+        //- li#menumeta.menutabs
+            a.menulinks(href="#", onclick="selectTab(event, 'meta')")
+                p.lead
+                    b Metadata
+        div#vis.menucontent.row.carousel-holder
+            div.col-md-12
+                div#carousel-example-generic.visual-box(display="inline-block")
+                    div.carousel-inner
+                        div.row
+                            div.col-lg-12
+                                ul.nav.nav-tabs
+                                    li#lichart.litabs
+                                        a.tablinks(href="#", onclick="openTab(event, 'chart')") Chart
+                                    li#limap.litabs
+                                        a.tablinks(href="#", onclick="openTab(event, 'map')") Map
+                                    li#litable.litabs
+                                        a.tablinks(href="#", onclick="openTab(event, 'table')") Table
+
+                                div(style="overflow:scroll")
+                                    include chart.pug
+
+                                include map.pug
+
+                                include table.pug
+
+                    br(style="clear: both;")
+    //- div#meta.menucontent.row.carousel-holder
         div.col-md-12
             div#carousel-example-generic.visual-box(display="inline-block")
                 div.carousel-inner
                     div.row
                         div.col-lg-12
-                            ul.nav.nav-tabs
-                                li#lichart.litabs
-                                    a.tablinks(href="#", onclick="openTab(event, 'chart')") Chart
-                                li#limap.litabs
-                                    a.tablinks(href="#", onclick="openTab(event, 'map')") Map
-                                li#litable.litabs
-                                    a.tablinks(href="#", onclick="openTab(event, 'table')") Table
-
-                            div(style="overflow:scroll")
-                                include chart.pug
-
-                            include map.pug
-
-                            include table.pug
-
-                br(style="clear: both;")
+                            p AIUEO

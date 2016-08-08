@@ -28,6 +28,12 @@ module.exports = function(mongoose) {
 		});
 	};
 
+	model.findByIdxName = function(idxName, callback) {
+		model.findOne({idxName: idxName}, function(err, category) {
+			callback(err, category);
+		});
+	};
+
 	model.findByLevel = function(level, callback) {
 		model.find({level: level}, function(err, categories) {
 			if (err) console.log(err);
