@@ -1,15 +1,18 @@
 script.
     $(document).ready(function() {
-        mapActive();
+        activeTab("tabcontent", "map", "li");
+        activeTab("menucontent", "vis", "menu");
     });
 
-    function mapActive() {
-        tabcontent = document.getElementsByClassName("tabcontent");
+    function activeTab(className, tab, prefix) {
+        tabcontent = document.getElementsByClassName(className);
         for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].style.display = "none";
         }
 
-        document.getElementById('map').style.display = "block";
+        var tn = prefix + tab;
+        document.getElementById(tab).style.display = "block";
+        document.getElementById(tn).className += " active";
     }
 
     function openTab(event, tabname) {
@@ -69,14 +72,14 @@ script.
     }
 
 div.col-md-9
-    //- ul.nav.nav-tabs
-    //-     li#menuvis.menutabs
-    //-         a.menulinks(href="#", onclick="selectTab(event, 'vis')")
-    p.lead
-        b Visualisation
-        //- li#menumeta.menutabs
+    ul.nav.nav-tabs
+        li#menuvis.menutabs
+            a.menulinks(href="#", onclick="selectTab(event, 'vis')")
+                h4
+                    b Visualisation
+        li#menumeta.menutabs
             a.menulinks(href="#", onclick="selectTab(event, 'meta')")
-                p.lead
+                h4
                     b Metadata
         div#vis.menucontent.row.carousel-holder
             div.col-md-12
@@ -100,10 +103,35 @@ div.col-md-9
                                 include table.pug
 
                     br(style="clear: both;")
-    //- div#meta.menucontent.row.carousel-holder
+    div#meta.menucontent.row.carousel-holder
         div.col-md-12
             div#carousel-example-generic.visual-box(display="inline-block")
                 div.carousel-inner
                     div.row
                         div.col-lg-12
-                            p AIUEO
+                            if (ds)
+                                each table in ds
+                                    table.table.table-hover
+                                        tbody
+                                            tr
+                                                td 
+                                                    b Title
+                                                td #{table.dataset.label}
+                                            tr
+                                                td 
+                                                    b Description
+                                                td #{table.dataset.description}
+                                            tr
+                                                td 
+                                                    b Original Source
+                                                td 
+                                                    a(href=table.dataset.sourceLink) #{table.dataset.sourceLink}
+                                            tr
+                                                td 
+                                                    b Named Graph
+                                                td #{table.dataset.namedGraph}
+                                            tr
+                                                td 
+                                                    b List of Predicates
+                                                td #{table.dataset.predicates}
+                                    br
