@@ -519,7 +519,7 @@ module.exports = function (app, models){
 
 	var updateQuery = function(){
 		var queryString = " select distinct ?Subject ?Type ?Label ?Dataset ?RefPeriod ?RefArea ?Area ?Score ?Longitude ?Latitude"
-						+ " from <http://localhost:8890/imd/score/environment>"
+						+ " from <http://localhost:8890/imd/score/employment>"
 						+ " from <http://localhost:8890/location/lsoa>"
 						+ " where {"
 						+ " ?Subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?Type."
@@ -527,7 +527,7 @@ module.exports = function (app, models){
 						+ " ?Subject <http://purl.org/linked-data/cube#dataSet> ?Dataset."
 						+ " ?Subject <http://opendatacommunities.org/def/ontology/time/refPeriod> ?RefPeriod."
 						+ " ?Subject <http://opendatacommunities.org/def/ontology/geography/refArea> ?RefArea."
-						+ " ?Subject <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEnvironmentScore> ?Score."
+						+ " ?Subject <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEmploymentScore> ?Score."
 						+ " ?RefArea <http://www.w3.org/2000/01/rdf-schema#label> ?Area."
 						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?Longitude."
 						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?Latitude."

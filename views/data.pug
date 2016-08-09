@@ -1,0 +1,30 @@
+extend main
+
+block content
+	div.col-md-12
+		b #{breadcrumb}
+		br
+		br
+		table.table.table-hover
+			tbody
+				tr
+					td 
+						b Title
+					td #{dataset.label}
+				tr
+					td 
+						b Description
+					td #{dataset.description}
+				tr
+					td 
+						b Original Source
+					td 
+						a(href=dataset.sourceLink) #{dataset.sourceLink}
+				tr
+					td 
+						b Named Graph
+					td #{dataset.namedGraph}
+				tr
+					td 
+						b List of Predicates
+					td #{dataset.predicates}

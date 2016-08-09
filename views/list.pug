@@ -17,7 +17,7 @@ block content
                                     h4.panel-title
                                         a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxName, href="#"+category.idxName+"-"+child.idxName) #{child.label}
                                 div.panel-collapse.collapse(id=category.idxName+"-"+child.idxName)
-                                    if (child.datasets.length > 0)    
+                                    if (child.datasets.length > 0)
                                         div.panel-body
                                             table.table.table-hover
                                                 thead
@@ -28,5 +28,5 @@ block content
                                                     each dataset in child.datasets
                                                         tr
                                                             td 
-                                                                a(href=dataset.sourceLink) #{dataset.label}
+                                                                a(href="/d/"+dataset.idxName) #{dataset.label}
                                                             td #{dataset.description}

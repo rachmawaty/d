@@ -2,6 +2,7 @@ var request = require('request');
 
 module.exports = function(app, models){
 	require('./misc')(app, models);
+	require('./data')(app, models);
 	var queries = require('./query')(app, models);
 
 	var getCategoriesAndDatasets = function(callback){
