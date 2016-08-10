@@ -92,64 +92,57 @@ module.exports = function(app, models){
 			});
 		}, function(err){
 			if (err) console.log(err);
-			app.async.parallel([
-				function(callback){
-					var chartData = [];
-					var xtitle = results[0].chartAttributes.x;
-					var ytitle = results[0].chartAttributes.y;
-					app.async.each(results, function(result, cb_temp){
-						var chart = {};
-						chart.name = result.title;
-						chart.type = "bar";
-						chart.x = [];
-						chart.y = [];
-						app.async.each(result.bindings, function(row, cb_row){
-							chart.x.push(row[result.chartAttributes.x].value);
-							chart.y.push(row[result.chartAttributes.y].value);
-							cb_row();
-						}, function(err){
-							if (err) console.log(err);
-							chartData.push(chart);
-							cb_temp();
-						});
-					}, function(err){
-						if (err) console.log(err);
-						var res = {};
-						res.xtitle = xtitle;
-						res.ytitle = ytitle;
-						res.data = chartData;
-						callback(err, res);
-					});
-				}, function(callback){
-					var mapData = [];
-					// app.async.each(results, function(result, cb_temp){
-					// 	var chart = {};
-					// 	chart.name = result.title;
-					// 	chart.type = "bar";
-					// 	chart.x = [];
-					// 	chart.y = [];
-					// 	app.async.each(result.bindings, function(row, cb_row){
-					// 		chart.x.push(row[result.chartAttributes.x].value);
-					// 		chart.y.push(row[result.chartAttributes.y].value);
-					// 		cb_row();
-					// 	}, function(err){
-					// 		if (err) console.log(err);
-					// 		chartData.push(chart);
-					// 		cb_temp();
-					// 	});
-					// }, function(err){
-					// 	if (err) console.log(err);
-						callback(null, "");
-					// });
-				}
-			], function(err, res){
+			var start = app.moment();
+			var refArea = [];
+			var mapData = [];
+			var chartData = [];
+			var xtitle = results[0].chartAttributes.x;
+			var ytitle = results[0].chartAttributes.y;
+			app.async.each(results, function(result, cb_temp){
+				var chart = {};
+				chart.name = result.title;
+				chart.type = "bar";
+				chart.x = [];
+				chart.y = [];
+				app.async.each(result.bindings, function(row, cb_row){
+					var mapDataLength = mapData.length;
+					chart.x.push(row[result.chartAttributes.x].value);
+					chart.y.push(row[result.chartAttributes.y].value);
+					if (refArea.indexOf(row[result.mapAttributes.refArea].value) == -1) {
+						refArea.push(row[result.mapAttributes.refArea].value);
+						var data = { refArea: row[result.mapAttributes.refArea].value,
+									area: row[result.mapAttributes.area].value, 
+									lat: row[result.mapAttributes.lat].value, 
+									long: row[result.mapAttributes.long].value,
+									info: result.title + " : " + row[result.mapAttributes.information].value};
+						mapData.push(data);
+						cb_row();
+					} else {
+						for(var i = 0; i < mapDataLength; i++){
+							if (mapData[i].refArea == row[result.mapAttributes.refArea].value) {
+								var info = " <br> " + result.title + " : " + row[result.mapAttributes.information].value;
+								mapData[i].info += info;
+								cb_row();
+							}
+						}
+					}
+				}, function(err){
+					if (err) console.log(err);
+					chartData.push(chart);
+					var finish = app.moment();
+					var diff = finish - start;
+					console.log(diff);
+					console.log(mapData.length, mapData[0].info);
+					cb_temp();
+				});
+			}, function(err){
 				if (err) console.log(err);
-				var chartOptions = {xtitle: res[0].xtitle, ytitle: res[0].ytitle};
-				results.chartData = res[0].data;
+				var chartOptions = {xtitle: xtitle, ytitle: ytitle};
+				results.chartData = chartData;
 				results.chartOptions = chartOptions;
+				results.mapData = mapData;
 				callback(err, results);
-			});
-			
+			});		
 		});
 	};
 
@@ -197,11 +190,15 @@ module.exports = function(app, models){
 			if (err) console.log(error);
 			var chartOptions = {};
 			var data = {};
+			var mapData = {};
+			var dataTitle = "";
 			if (results[1]){
 				chartOptions.title = results[2];
 				chartOptions.xtitle = results[1].chartOptions.xtitle;
 				chartOptions.ytitle = results[1].chartOptions.ytitle;
 				data = results[1].chartData;
+				mapData = results[1].mapData;
+				dataTitle = results[2];
 			} else {
 				chartOptions.title = "Chart Title";
 				chartOptions.xtitle = "X";
@@ -211,8 +208,9 @@ module.exports = function(app, models){
 				active: "home", 
 				categories: results[0],
 				ds: results[1],
+				title: dataTitle,
 				data: JSON.stringify(data),
-				mapdata: JSON.stringify(results[1]),
+				mapdata: JSON.stringify(mapData),
 				chartOptions: JSON.stringify(chartOptions),
 				cat: categoryparam
 			});

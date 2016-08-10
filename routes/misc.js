@@ -493,17 +493,25 @@ module.exports = function (app, models){
 	// cheers('imd-score-health');
 
 	var updateLocation = function(){
-		var list = [ {name:'imd-rank-environment', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
-					{name:'imd-rank-education', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
-					{name:'imd-rank-health', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
-					{name:'imd-score-environment', long: 'Longitude', lat: 'Latitude', information: 'Score'},
-					{name:'imd-score-education', long: 'Longitude', lat: 'Latitude', information: 'Score'},
-					{name:'imd-score-health', long: 'Longitude', lat: 'Latitude', information: 'Score'},
+		var list = [ {name:'imd-rank-environment', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-rank-education', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-rank-health', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-rank-crime', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-rank-employment', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-rank-housing', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-rank-income', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Rank'},
+					{name:'imd-score-environment', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Score'},
+					{name:'imd-score-education', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Score'},
+					{name:'imd-score-health', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Score'},
+					{name:'imd-score-crime', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Score'},
+					{name:'imd-score-employment', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Score'},
+					{name:'imd-score-housing', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Score'},
+					{name:'imd-score-income', refArea: 'RefArea', area: 'Area', long: 'Longitude', lat: 'Latitude', information: 'Score'}
 					];
 	 	app.async.each(list, function(ds, cb){
 			models.datasets.findByIdxName(ds.name, function(err, dataset){
 				if (dataset) {
-					models.datasets.updateLocation(dataset._id, true, ds.long, ds.lat, ds.information, function(err){
+					models.datasets.updateLocation(dataset._id, true, ds.refArea, ds.area, ds.long, ds.lat, ds.information, function(err){
 						if (err) console.log(err);
 						cb();
 					});
@@ -639,11 +647,13 @@ module.exports = function (app, models){
 			var mapData = [];
 			app.async.each(results, function(result, cb_temp){
 				console.log(result.title);
-				app.async.each(result.bindings, function(row, cb_row){
+				app.async.each(result.rows, function(row, cb_row){
 					var mapDataLength = mapData.length;
-					if (refArea.indexOf(row["RefArea"].value) == -1) {
-						refArea.push(row["RefArea"].value);
-						var data = { refArea: row["RefArea"].value,
+					console.log(row["Area"].value);
+					if (refArea.indexOf(row[result.mapAttributes.refArea].value) == -1) {
+						refArea.push(row[result.mapAttributes.refArea].value);
+						var data = { refArea: row[result.mapAttributes.refArea].value,
+									area: row["Area"].value,
 									lat: row[result.mapAttributes.lat].value, 
 									long: row[result.mapAttributes.long].value,
 									info: result.title + " : " + row[result.mapAttributes.information].value};
@@ -651,7 +661,7 @@ module.exports = function (app, models){
 						cb_row();
 					} else {
 						for(var i = 0; i < mapDataLength; i++){
-							if (mapData[i].refArea == row["RefArea"].value) {
+							if (mapData[i].refArea == row[result.mapAttributes.refArea].value) {
 								var info = "-" + result.title + " : " + row[result.mapAttributes.information].value;
 								mapData[i].info += info;
 								cb_row();
@@ -672,7 +682,21 @@ module.exports = function (app, models){
 			});
 		});
 	};
-	getData(['imd-rank-health', 'imd-score-environment'], function(err, results){
-		// console.log(results.xtitle);
-	});
+	// getData(['imd-rank-health', 'imd-score-environment'], function(err, results){
+	// 	console.log(results.xtitle);
+	// });
+
+	var updateYear = function(){
+		models.datasets.findAll(function(err, datasets){
+			app.async.each(datasets, function(dataset, cb){
+				models.datasets.updateYear(dataset._id, "2010", function(err, dataset){
+					cb();
+				});
+			}, function(err){
+
+			});
+		});
+	}
+
+	// updateYear();
 }
