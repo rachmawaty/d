@@ -10,6 +10,7 @@ module.exports = function(mongoose) {
 		sourceLink: String,
 		description: String,
 		namedGraph: String,
+		year: String,
 		categoryId: ObjectId,
 		hasLocation: Boolean,
 		description: String,

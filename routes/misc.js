@@ -594,4 +594,85 @@ module.exports = function (app, models){
 		}
 	}
 	// updateNamedGraphs();
+
+	var getData = function(params, callback){
+		var results = [];
+		app.async.each(params, function(param, cb_dt){
+			models.datasets.findByIdxName(param, function(err, dataset){
+				if (dataset){
+					models.datasets.getQuery(dataset._id, function(err, query){
+						if (err) console.log(err);
+						var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
+
+						app.http.get(api, function(res){
+						    var body = '';
+
+						    res.on('data', function(chunk){
+						        body += chunk;
+						    });
+
+						    res.on('end', function(){
+						        var dt = JSON.parse(body);
+						        dt.results.dataset = dataset;
+						        dt.results.dataId = dataset._id;
+						        dt.results.title = dataset.label;
+						        dt.results.chartAttributes = dataset.chartAttributes;
+						        dt.results.mapAttributes = dataset.mapAttributes;
+						        dt.results.rows = dt.results.bindings;
+						        dt.results.attributes = dt.head.vars;
+						        results.push(dt.results);
+						        cb_dt();
+						    });
+						}).on('error', function(e){
+						    console.log("Got an error: ", e);
+						    cb_dt();
+						});
+					});
+				} else {
+					cb_dt();
+				}
+			});
+		}, function(err){
+			if (err) console.log(err);
+			var start = app.moment();
+			var refArea = [];
+			var mapData = [];
+			app.async.each(results, function(result, cb_temp){
+				console.log(result.title);
+				app.async.each(result.bindings, function(row, cb_row){
+					var mapDataLength = mapData.length;
+					if (refArea.indexOf(row["RefArea"].value) == -1) {
+						refArea.push(row["RefArea"].value);
+						var data = { refArea: row["RefArea"].value,
+									lat: row[result.mapAttributes.lat].value, 
+									long: row[result.mapAttributes.long].value,
+									info: result.title + " : " + row[result.mapAttributes.information].value};
+						mapData.push(data);
+						cb_row();
+					} else {
+						for(var i = 0; i < mapDataLength; i++){
+							if (mapData[i].refArea == row["RefArea"].value) {
+								var info = "-" + result.title + " : " + row[result.mapAttributes.information].value;
+								mapData[i].info += info;
+								cb_row();
+							}
+						}
+					}
+					// console.log(row["RefArea"].value, row[result.mapAttributes.lat].value, row[result.mapAttributes.long].value, row[result.mapAttributes.information].value);					
+				}, function(err){
+					if (err) console.log(err);
+					cb_temp();
+				});
+			}, function(err){
+				if (err) console.log(err);
+				var finish = app.moment();
+				var diff = finish - start;
+				console.log(diff);
+				console.log(mapData.length, mapData[0].info);
+			});
+		});
+	};
+	getData(['imd-rank-health', 'imd-score-environment'], function(err, results){
+		// console.log(results.xtitle);
+	});
 }
