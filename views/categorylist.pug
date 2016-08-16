@@ -6,6 +6,6 @@ div.panel-collapse.collapse(id=category.idxName+"-"+child.idxName)
                 each dataset in child.datasets
                     input(type="checkbox" name="dataset" value=dataset.idxName)
                     span 
-                        a(href="#") #{dataset.label}
+                        a(href="/d/"+dataset.idxName) #{dataset.label}
                     br
                 input.btn.btn-default.btn-right(id=child.label, type="submit", value="Go")

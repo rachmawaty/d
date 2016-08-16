@@ -5,6 +5,10 @@ module.exports = function(app, models){
 	require('./data')(app, models);
 	var queries = require('./query')(app, models);
 
+	function isEmpty(obj) {
+	    return Object.keys(obj).length === 0;
+	}
+
 	var getCategoriesAndDatasets = function(callback){
 		models.categories.findByLevel(0, function(err, parent_categories){
 			if (err) console.log(err);
@@ -96,8 +100,12 @@ module.exports = function(app, models){
 			var refArea = [];
 			var mapData = [];
 			var chartData = [];
-			var xtitle = results[0].chartAttributes.x;
-			var ytitle = results[0].chartAttributes.y;
+			var xtitle = "";
+			var ytitle = "";
+			if (results[0].chartAttributes){
+				xtitle = results[0].chartAttributes.x;
+				ytitle = results[0].chartAttributes.y;
+			}
 			app.async.each(results, function(result, cb_temp){
 				var chart = {};
 				chart.name = result.title;
@@ -106,33 +114,54 @@ module.exports = function(app, models){
 				chart.y = [];
 				app.async.each(result.bindings, function(row, cb_row){
 					var mapDataLength = mapData.length;
-					chart.x.push(row[result.chartAttributes.x].value);
-					chart.y.push(row[result.chartAttributes.y].value);
-					if (refArea.indexOf(row[result.mapAttributes.refArea].value) == -1) {
-						refArea.push(row[result.mapAttributes.refArea].value);
-						var data = { refArea: row[result.mapAttributes.refArea].value,
-									area: row[result.mapAttributes.area].value, 
-									lat: row[result.mapAttributes.lat].value, 
-									long: row[result.mapAttributes.long].value,
-									info: result.title + " : " + row[result.mapAttributes.information].value};
-						mapData.push(data);
-						cb_row();
-					} else {
-						for(var i = 0; i < mapDataLength; i++){
-							if (mapData[i].refArea == row[result.mapAttributes.refArea].value) {
-								var info = " <br> " + result.title + " : " + row[result.mapAttributes.information].value;
-								mapData[i].info += info;
-								cb_row();
+					
+					app.async.parallel([
+						function(callback){
+							if (result.chartAttributes.x && result.chartAttributes.y){ 
+								// console.log(result.chartAttributes, 'MASUK'); cb_row();
+								chart.x.push(row[result.chartAttributes.x].value);
+								chart.y.push(row[result.chartAttributes.y].value);
+								callback(null);
+							} else {
+								callback(null);
+							}
+						}, function(callback){
+							if (result.mapAttributes.refArea){
+								if (refArea.indexOf(row[result.mapAttributes.refArea].value) == -1) {
+									refArea.push(row[result.mapAttributes.refArea].value);
+									var data = { refArea: row[result.mapAttributes.refArea].value,
+												area: row[result.mapAttributes.area].value, 
+												lat: row[result.mapAttributes.lat].value, 
+												long: row[result.mapAttributes.long].value,
+												info: result.title + " : " + row[result.mapAttributes.information].value};
+									mapData.push(data);
+									// cb_row();
+									callback(null);
+								} else {
+									for(var i = 0; i < mapDataLength; i++){
+										if (mapData[i].refArea == row[result.mapAttributes.refArea].value) {
+											var info = " <br> " + result.title + " : " + row[result.mapAttributes.information].value;
+											mapData[i].info += info;
+											// cb_row();
+											callback(null);
+										}
+									}
+								}
+							} else {
+								callback(null);
 							}
 						}
-					}
+					], function(err, res){
+						if (err) console.log(err);
+						cb_row();
+					});
 				}, function(err){
 					if (err) console.log(err);
 					chartData.push(chart);
 					var finish = app.moment();
 					var diff = finish - start;
 					console.log(diff);
-					console.log(mapData.length, mapData[0].info);
+					// console.log(mapData.length, mapData[0].info);
 					cb_temp();
 				});
 			}, function(err){
@@ -141,6 +170,7 @@ module.exports = function(app, models){
 				results.chartData = chartData;
 				results.chartOptions = chartOptions;
 				results.mapData = mapData;
+				console.log('MASUK');
 				callback(err, results);
 			});		
 		});

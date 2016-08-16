@@ -358,30 +358,38 @@ module.exports = function (app, models){
 	// savePredicatesToDataset();
 
 	var addChartAttributesV2 = function(){
-		var list = [ {name:'imd-rank-environment',
+		var list = [ {name:'imd-rank-crime',
 						  chart:{x:'Area',
 						   y:'Rank'}
-						},
-						{name:'imd-rank-health',
-						  chart:{x:'Area',
-						   y:'Rank'}
-						},
-						{name:'imd-rank-education',
-						  chart:{x:'Area',
-						   y:'Rank'}
-						},
-						{name:'imd-score-environment',
-						  chart:{x:'Area',
-						   y:'Score'}
-						},
-						{name:'imd-score-health',
-						  chart:{x:'Area',
-						   y:'Score'}
-						},
-						{name:'imd-score-education',
-						  chart:{x:'Area',
-						   y:'Score'}
-						}];
+					},
+					{name:'imd-rank-employment',
+					  chart:{x:'Area',
+					   y:'Rank'}
+					},
+					{name:'imd-rank-housing',
+					  chart:{x:'Area',
+					   y:'Rank'}
+					},
+					{name:'imd-rank-income',
+					  chart:{x:'Area',
+					   y:'Rank'}
+					},
+					{name:'imd-score-crime',
+					  chart:{x:'Area',
+					   y:'Score'}
+					},
+					{name:'imd-score-employment',
+					  chart:{x:'Area',
+					   y:'Score'}
+					},
+					{name:'imd-score-housing',
+					  chart:{x:'Area',
+					   y:'Score'}
+					},
+					{name:'imd-score-income',
+					  chart:{x:'Area',
+					   y:'Score'}
+					}];
 	 	app.async.each(list, function(ds, cb){
 			models.datasets.findByIdxName(ds.name, function(err, dataset){
 				if (dataset) {
@@ -526,8 +534,8 @@ module.exports = function (app, models){
 	// updateLocation();
 
 	var updateQuery = function(){
-		var queryString = " select distinct ?Subject ?Type ?Label ?Dataset ?RefPeriod ?RefArea ?Area ?Score ?Longitude ?Latitude"
-						+ " from <http://localhost:8890/imd/score/employment>"
+		var queryString = " select distinct ?Subject ?Type ?Label ?Dataset ?RefPeriod ?RefArea ?Area ?Rank ?Longitude ?Latitude"
+						+ " from <http://localhost:8890/imd/rank/housing>"
 						+ " from <http://localhost:8890/location/lsoa>"
 						+ " where {"
 						+ " ?Subject <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?Type."
@@ -535,7 +543,7 @@ module.exports = function (app, models){
 						+ " ?Subject <http://purl.org/linked-data/cube#dataSet> ?Dataset."
 						+ " ?Subject <http://opendatacommunities.org/def/ontology/time/refPeriod> ?RefPeriod."
 						+ " ?Subject <http://opendatacommunities.org/def/ontology/geography/refArea> ?RefArea."
-						+ " ?Subject <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdEmploymentScore> ?Score."
+						+ " ?Subject <http://opendatacommunities.org/def/ontology/societal-wellbeing/deprivation/imdHousingRank> ?Rank."
 						+ " ?RefArea <http://www.w3.org/2000/01/rdf-schema#label> ?Area."
 						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?Longitude."
 						+ " ?RefArea <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?Latitude."
@@ -546,7 +554,7 @@ module.exports = function (app, models){
 						+ " }"
 						+ " 	}" 
 						+ " } order by ?Subject";
-		models.datasets.findByIdxName('imd-score-environment', function(err, dataset){
+		models.datasets.findByIdxName('imd-rank-housing', function(err, dataset){
 			models.datasets.updateQuery(dataset._id, queryString, function(err){
 				if (err) console.log(err);
 			});
@@ -699,4 +707,75 @@ module.exports = function (app, models){
 	}
 
 	// updateYear();
+
+	var checkDataset = function(){
+		models.datasets.findAll(function(err, datasets){
+			app.async.each(datasets, function(dataset, cb){
+				var desc = "The English Indices of Deprivation provide a relative measure of deprivation at small area level across England. Areas are ranked from least deprived to most deprived on seven different dimensions of deprivation and an overall composite measure of multiple deprivation. Most of the data underlying the 2010 indices are for the year 2008. The indices have been constructed by the Social Disadvantage Research Centre at the University of Oxford for the Department for Communities and Local Government. All figures can only be reproduced if the source (Department for Communities and Local Government, Indices of Deprivation 2010) is fully acknowledged. The domains used in the Indices of Deprivation 2010 are: income deprivation; employment deprivation; health deprivation and disability; education deprivation; crime deprivation; barriers to housing and services deprivation; and living environment deprivation. Each of these domains has its own scores and ranks, allowing users to focus on specific aspects of deprivation. Because the indices give a relative measure, they can tell you if one area is more deprived than another but not by how much. For example, if an area has a rank of 40 it is not half as deprived as a place with a rank of 20. The Index of Multiple Deprivation was constructed by combining scores from the seven domains. When comparing areas, a higher deprivation score indicates a higher proportion of people living there who are classed as deprived. But as for ranks, deprivation scores can only tell you if one area is more deprived than another, but not by how much. This dataset was created from a spreadsheet provided by the Department of Communities and Local Government, which can be downloaded [here](https://www.gov.uk/government/publications/english-indices-of-deprivation-2010). The method for calculating the IMD score and underlying indicators is detailed in the report '[The English Indices of Deprivation 2010: Technical Report](https://www.gov.uk/government/publications/english-indices-of-deprivation-2010-technical-report)'. The data is represented here as Linked Data, using the Data Cube ontology.";
+				// if (!dataset.query){
+				// 	// var prefix = "http://opendatacommunities.org/data/societal-wellbeing/deprivation/";
+				// 	// var idxnamesplit = (dataset.idxName).split("-");//imd-income-rank-2010',
+				// 	// var addLink = prefix + idxnamesplit[0] + "-" + idxnamesplit[2] + "-" + idxnamesplit[1] + "-2010";
+				// 	console.log(dataset.idxName);
+					models.datasets.updateDescription(dataset._id, desc, function(err){
+						cb();
+					});
+				// } else {
+				// 	// console.log('NO');
+				// 	cb();
+				// }
+			}, function(err){
+
+			});
+		});
+	}
+	// checkDataset();
+
+	var addBuses = function(){
+		var sourceLink = "http://datagm.org.uk/dataset/tfgm-bus-stops-and-schedules-linked-data";
+		var namedGraph = "http://localhost:8890/transport/bus/143";
+		var categoryId = "5789373a1822f78f17a12beb";
+		var desc = "Linked data version of the TfGM bus stops and schedule data that is released as ATCO-CIF data. See http://datagm.org.uk/package/atco-cif for details." 
+			+ "It combines the schedule data with location information on bus stops from the 'NaPTAN' dataset available through http://transport.data.gov.uk";
+		var idxname = "tfgm-bus-143";
+		var query = "";
+
+		models.datasets.newDataset("Route 143", idxname, sourceLink, namedGraph, categoryId, function(err, dset){
+			// if (dset) {
+			// 	models.datasets.updateNamedGraphByIdxName(idxname, function(err){
+			// 		console.log("MASUK NAMEDGRAPH");
+			// 	});
+			// }
+			console.log(dset);
+		});
+	}
+	// addBuses();
+
+	var addDescription = function(){
+		var sourceLink = "http://datagm.org.uk/dataset/tfgm-bus-stops-and-schedules-linked-data";
+		var namedGraph = "http://localhost:8890/transport/bus/143";
+		var categoryId = "5789373a1822f78f17a12beb";
+		var desc = "Linked data version of the TfGM bus stops and schedule data that is released as ATCO-CIF data. See http://datagm.org.uk/package/atco-cif for details." 
+			+ "It combines the schedule data with location information on bus stops from the 'NaPTAN' dataset available through http://transport.data.gov.uk";
+		var idxname = "tfgm-bus-147";
+		var query = "select distinct ?ServiceCalendar ?TermsTrip ?TermsTripLabel ?StopTime ?ArrivalTime ?DepartureTime ?Sequence ?StopPoint"
++ " where {"
++ " ?Subject <http://vocab.org/transit/terms/serviceCalendar> ?ServiceCalendar."
++ " ?ServiceCalendar <http://vocab.org/transit/terms/trip> ?TermsTrip."
++ " ?TermsTrip <http://www.w3.org/2000/01/rdf-schema#label> ?TermsTripLabel."
++ " ?TermsTrip <http://vocab.org/transit/terms/stopTime> ?StopTime."
++ " ?StopTime <http://vocab.org/transit/terms/stop> ?StopPoint."
++ " ?StopTime <http://vocab.org/transit/terms/arrivalTime> ?ArrivalTime."
++ " ?StopTime <http://vocab.org/transit/terms/departureTime> ?DepartureTime."
++ " ?StopTime <http://vocab.org/transit/terms/sequence> ?Sequence"
++ " } order by ?Sequence";
+
+		models.datasets.findByIdxName(idxname, function(err, dataset){
+			models.datasets.updateQuery(dataset._id, query, function(err){
+				// console.log("MASUK NAMEDGRAPH");
+			});
+			// console.log(dset);
+		});
+	}
+	// addDescription();
 }

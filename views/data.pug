@@ -8,27 +8,30 @@ block content
 		table.table.table-hover
 			tbody
 				tr
-					td(style="width:300px")
+					td(style="width:200px")
 						b Title
 					td #{dataset.label}
 				tr
-					td(style="width:300px")
+					td(style="width:200px")
 						b Description
 					td #{dataset.description}
 				tr
-					td(style="width:300px")
+					td(style="width:200px")
 						b Original Source
 					td 
 						a(href=dataset.sourceLink) #{dataset.sourceLink}
 				tr
-					td(style="width:300px")
+					td(style="width:200px")
 						b Named Graph
 					td #{dataset.namedGraph}
 				tr
-					td(style="width:300px")
+					td(style="width:200px")
 						b Year or Period
 					td #{dataset.year}
 				tr
-					td(style="width:300px")
-						b List of Predicates
-					td #{dataset.predicates}
+					td(style="width:200px")
+						b Vocabularies
+					td 
+						each predicate in dataset.predicates
+							a(href=predicate) #{predicate} 
+							br
