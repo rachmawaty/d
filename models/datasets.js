@@ -5,28 +5,18 @@ module.exports = function(mongoose) {
 
 	var schema = new Schema({
 		_id: ObjectId,
-		label: String,
-		idxName: String,
-		sourceLink: String,
-		description: String,
-		namedGraph: String,
-		year: String,
-		categoryId: ObjectId,
-		hasLocation: Boolean,
-		description: String,
-		predicates: Array,
-		chartAttributes: {
-			x: String, //header
-			y: String //header
+		categoryid: ObjectId,
+		idxname: String,
+		title: String,
+		query: String,
+		metadata: {
+			namedgraph: String,
+			description: String,
+			sourcelink: String,
+			yearorperiod: String,
+			lastupdate: Date
 		},
-		mapAttributes: {
-			refArea: String,
-			area: String,
-			long: String,
-			lat: String,
-			information: String
-		},
-		query: String
+		vocabs: Array
 	});
 
 	var model = mongoose.model(collection, schema);
@@ -38,41 +28,35 @@ module.exports = function(mongoose) {
 		});
 	};
 
-	model.findById = function(datasetId, callback) {
-		model.findOne({_id: datasetId}, function(err, dataset) {
+	model.findById = function(id, callback) {
+		model.findOne({_id: id}, function(err, dataset) {
 			callback(err, dataset);
 		});
 	};
 
-	model.findByIdxName = function(idxName, callback) {
-		model.findOne({idxName: idxName}, function(err, dataset) {
+	model.findByIdxName = function(idxname, callback) {
+		model.findOne({idxname: idxname}, function(err, dataset) {
 			callback(err, dataset);
 		});
 	};
 
-	model.findByCategoryId = function(categoryId, callback) {
-		model.find({categoryId: categoryId}, function(err, datasets) {
+	model.findByCategoryId = function(categoryid, callback) {
+		model.find({categoryid: categoryid}, function(err, datasets) {
 			if (err) console.log(err);
 			callback(err, datasets);
 		});
 	};
 
-	model.getChartAttributes = function(datasetId, callback) {
-		model.findOne({_id: datasetId}, function(err, dataset) {
-			callback(err, dataset.chartAttributes);
-		});
-	};
-
-	model.getQuery = function(datasetId, callback) {
-		model.findOne({_id: datasetId}, function(err, dataset) {
+	model.getQueryByIdxName = function(idxname, callback) {
+		model.findOne({idxname: idxname}, function(err, dataset) {
 			callback(err, dataset.query);
 		});
 	};
 
-	model.updateChartAttributes = function(id, chartAttributes, callback) {
-		var conditions = {_id: id}
+	model.updateCategoryId = function(idxname, categoryid, callback) {
+        var conditions = {idxname: idxname}
 	        , update = { $set: { 
-	        	chartAttributes: chartAttributes
+	        	categoryid: categoryid
 	        }}
 	        , options = { multi: false };
         model.update(conditions, update, options, function (err, numAffected) {
@@ -82,10 +66,29 @@ module.exports = function(mongoose) {
         });
 	};
 
-	model.updateDescription = function(id, description, callback) {
+	model.updateMetadata = function(idxname, namedgraph, description, sourcelink, yearorperiod, lastupdate, callback) {
+        var metadata = {};
+        metadata.namedgraph = namedgraph;
+        metadata.description = description;
+        metadata.sourcelink = sourcelink;
+        metadata.yearorperiod = yearorperiod;
+        metadata.lastupdate = lastupdate;
+        var conditions = {idxname: idxname}
+	        , update = { $set: { 
+	        	metadata: metadata
+	        }}
+	        , options = { multi: false };
+        model.update(conditions, update, options, function (err, numAffected) {
+          if(err) console.log(err);
+          console.log(numAffected + 'updated');
+          callback(err);
+        });
+	};
+
+	model.updateVocabs = function(id, vocabs, callback) {
         var conditions = {_id: id}
 	        , update = { $set: { 
-	        	description: description
+	        	vocabs: vocabs
 	        }}
 	        , options = { multi: false };
         model.update(conditions, update, options, function (err, numAffected) {
@@ -95,11 +98,10 @@ module.exports = function(mongoose) {
         });
 	};
 
-	model.updateLocation = function(id, _hasLocation, _refArea, _area, _long, _lat, _info, callback) {
+	model.updateSourceLink = function(id, sourcelink, callback) {
         var conditions = {_id: id}
 	        , update = { $set: { 
-	        	hasLocation: _hasLocation,
-	        	mapAttributes: {refArea: _refArea, area: _area, long: _long, lat: _lat, information: _info}
+	        	sourcelink: sourcelink
 	        }}
 	        , options = { multi: false };
         model.update(conditions, update, options, function (err, numAffected) {
@@ -109,10 +111,10 @@ module.exports = function(mongoose) {
         });
 	};
 
-	model.updatePredicates = function(id, predicates, callback) {
+	model.updateYearOrPeriod = function(id, yearorperiod, callback) {
         var conditions = {_id: id}
 	        , update = { $set: { 
-	        	predicates: predicates
+	        	yearorperiod: yearorperiod
 	        }}
 	        , options = { multi: false };
         model.update(conditions, update, options, function (err, numAffected) {
@@ -122,47 +124,8 @@ module.exports = function(mongoose) {
         });
 	};
 
-	model.updateSourceLink = function(id, sourceLink, callback) {
-        var conditions = {_id: id}
-	        , update = { $set: { 
-	        	sourceLink: sourceLink
-	        }}
-	        , options = { multi: false };
-        model.update(conditions, update, options, function (err, numAffected) {
-          if(err) console.log(err);
-          console.log(numAffected + 'updated');
-          callback(err);
-        });
-	};
-
-	model.updateYear = function(id, year, callback) {
-        var conditions = {_id: id}
-	        , update = { $set: { 
-	        	year: year
-	        }}
-	        , options = { multi: false };
-        model.update(conditions, update, options, function (err, numAffected) {
-          if(err) console.log(err);
-          console.log(numAffected + 'updated');
-          callback(err);
-        });
-	};
-
-	model.updateNamedGraphByIdxName = function(idxName, namedGraph, callback) {
-        var conditions = {idxName: idxName}
-	        , update = { $set: { 
-	        	namedGraph: namedGraph
-	        }}
-	        , options = { multi: false };
-        model.update(conditions, update, options, function (err, numAffected) {
-          if(err) console.log(err);
-          console.log(numAffected + 'updated');
-          callback(err);
-        });
-	};
-
-	model.updateQuery = function(id, query, callback) {
-        var conditions = {_id: id}
+	model.updateQuery = function(idxname, query, callback) {
+        var conditions = {idxname: idxname}
 	        , update = { $set: { 
 	        	query: query
 	        }}
@@ -174,15 +137,13 @@ module.exports = function(mongoose) {
         });
 	};	
 
-	model.newDataset = function(label, idxName, sourceLink, namedGraph, categoryId, callback ) {
+	model.newDataset = function(categoryid, idxname, title, query, callback ) {
 		var dataset = new model ({
 			_id: new mongoose.Types.ObjectId(),
-			label: label,
-			idxName: idxName,
-			sourceLink: sourceLink,
-			namedGraph: namedGraph,
-			categoryId: categoryId,
-			description: "Default description"
+			categoryid: categoryid,
+			idxname: idxname,
+			title: title,
+			query: query
 	    });
 
 		dataset.save(function(err) {

@@ -6,11 +6,21 @@ div.col-md-3
             div.panel.panel-default
                 div.panel-heading
                     h4.panel-title
-                        a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#"+category.idxName) #{category.label}
-                div.panel-collapse.collapse(id=category.idxName)
+                        a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#"+category.idxname) #{category.label}
+                div.panel-collapse.collapse(id=category.idxname)
                     each child in category.children
                         div.panel
                             div.panel-heading
                                 h4.panel-title
-                                    a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxName, href="#"+category.idxName+"-"+child.idxName) #{child.label}
-                            include categorylist.pug
+                                    a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxname, href="#"+category.idxname+"-"+child.idxname) #{child.label}
+                            div.panel-collapse.collapse(id=category.idxname+"-"+child.idxname)
+                                if (child.datasets.length > 0)    
+                                    div.panel-body
+                                        form(action="/", method="get")
+                                            input(type="hidden" name="category" value=category.idxname+"-"+child.idxname)
+                                            each dataset in child.datasets
+                                                input(type="checkbox" name="dataset" value=dataset.idxname)
+                                                span 
+                                                    a(href="/d/"+dataset.idxname) #{dataset.title}
+                                                br
+                                            input.btn.btn-default.btn-right(id=child.label, type="submit", value="Go")

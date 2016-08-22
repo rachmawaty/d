@@ -7,6 +7,9 @@ module.exports = function (app, models){
 	var selectAllGraphs = "SELECT DISTINCT ?namedgraph ?label"
 							+" WHERE { GRAPH ?namedgraph { ?s ?p ?o } }"
 							+" ORDER BY ?namedgraph";
+	var defaultQuery = " { select distinct *"
+						+" where { ?Subject ?Predicate ?Object }"
+						+" } ";
 
 	this.getAttributes = function(predicates, callback){
 		var selects = " ?Subject";

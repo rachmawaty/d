@@ -5,12 +5,11 @@ module.exports = function(mongoose) {
 
 	var schema = new Schema({
 		_id: ObjectId,
+		parentid: ObjectId,
 		label: String,
-		level: Number, // (0 == parent, 1 == child)
-		idxName: String,
-		parentId: ObjectId,
-		parentIdxName: String,
-		visualisationType: Array
+		level: Number, //0: parent, 1: child
+		idxname: String,
+		parentidxname: String
 	});
 
 	var model = mongoose.model(collection, schema);
@@ -28,8 +27,8 @@ module.exports = function(mongoose) {
 		});
 	};
 
-	model.findByIdxName = function(idxName, callback) {
-		model.findOne({idxName: idxName}, function(err, category) {
+	model.findByIdxName = function(idxname, callback) {
+		model.findOne({idxname: idxname}, function(err, category) {
 			callback(err, category);
 		});
 	};
@@ -41,24 +40,24 @@ module.exports = function(mongoose) {
 		});
 	};
 
-	model.findByParentId = function(parentId, callback) {
-		model.find({parentId: parentId}, function(err, categories) {
+	model.findByParentId = function(parentid, callback) {
+		model.find({parentid: parentid}, function(err, categories) {
 			if (err) console.log(err);
 			callback(err, categories);
 		});
 	};
 
-	model.findByParentIdxName = function(parentIdxName, callback) {
-		model.find({parentIdxName: parentIdxName}, function(err, categories) {
+	model.findByParentIdxName = function(parentidxname, callback) {
+		model.find({parentidxname: parentidxname}, function(err, categories) {
 			if (err) console.log(err);
 			callback(err, categories);
 		});
 	};
 
-	model.updateParentId = function(id, parentId, callback) {
+	model.updateParentId = function(id, parentid, callback) {
         var conditions = {_id: id}
 	        , update = { $set: { 
-	        	parentId: parentId
+	        	parentid: parentid
 	        }}
 	        , options = { multi: false };
         model.update(conditions, update, options, function (err, numAffected) {
@@ -68,13 +67,13 @@ module.exports = function(mongoose) {
         });
 	};
 
-	model.newCategory = function(label, level, idxName, parentIdxName, callback ) {
+	model.newCategory = function(label, level, idxname, parentidxname, callback) {
 		var category = new model ({
 			_id: new mongoose.Types.ObjectId(),
 			label: label,
 			level:level,
-			idxName: idxName,
-			parentIdxName: parentIdxName
+			idxname: idxname,
+			parentidxname: parentidxname
 	    });
 
 		category.save(function(err) {

@@ -1,0 +1,32 @@
+extend main
+
+block content
+    div.col-md-12
+        p.lead
+            b Datasets
+        div.panel-group#accordion
+            each category in categories
+                div.panel.panel-default
+                    div.panel-heading
+                        h4.panel-title
+                            a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#"+category.idxname) #{category.label}
+                    div.panel-collapse.collapse(id=category.idxname)
+                        each child in category.children
+                            div.panel
+                                div.panel-heading
+                                    h4.panel-title
+                                        a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxname, href="#"+category.idxname+"-"+child.idxname) #{child.label}
+                                div.panel-collapse.collapse(id=category.idxname+"-"+child.idxname)
+                                    if (child.datasets.length > 0)
+                                        div.panel-body
+                                            table.table.table-hover
+                                                thead
+                                                    tr
+                                                        th Title
+                                                        th Description
+                                                tbody
+                                                    each dataset in child.datasets
+                                                        tr
+                                                            td(style="width:300px")
+                                                                a(href="/d/"+dataset.idxname) #{dataset.title}
+                                                            td #{dataset.metadata.description}

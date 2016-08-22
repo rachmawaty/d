@@ -6,15 +6,15 @@ var app = express();
 app.path = require('path');
 app.fs = require('fs');
 
+app.promise = require('promise');
 app.async = require('async');
 app.moment = require("moment");
 
 /*** data connection ***/
 app.mongoStore = require('connect-mongo');
 app.mongoose = require('mongoose');
-app.mongoose.connect('mongodb://localhost:27017/dapp');
-// app.n3 = require('n3');
-// app.rdfstore = require('rdfstore');
+// app.mongoose.connect('mongodb://localhost:27017/dapp');
+app.mongoose.connect('mongodb://localhost:27017/dapp2');
 
 /*** visualisation ***/
 // app.plotly = require('plotly')("rachmawaty", "7x4q8r5vid");
@@ -34,7 +34,8 @@ app.set('view engine', 'pug');
 var models = {};
 models.categories = require('./models/categories')(app.mongoose).model;
 models.datasets = require('./models/datasets')(app.mongoose).model;
-models.predicates = require('./models/predicates')(app.mongoose).model;
+models.visualisations = require('./models/visualisations')(app.mongoose).model;
+models.items = require('./models/items')(app.mongoose).model;
 
 var next = function() {
     app.listen(2525);

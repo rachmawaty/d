@@ -1,0 +1,34 @@
+script.
+    $(document).ready(function() {
+        $('#tabledataset').DataTable({
+            "pageLength": 1,
+            "searching": false,
+            "ordering": false,
+            "lengthChange": false,
+            "scrollX": 720,
+            "scrollY": 480
+        });
+    } );
+
+div#table.tabcontent
+    if (ds)
+        table#tabledataset.display(style="width:100%")
+            thead
+                tr
+                    th
+            tbody
+                each table in ds
+                    tr
+                        td
+                            h4 #{table.title}
+                            table.table.table-hover
+                                thead
+                                    tr
+                                        each attr in table.headers
+                                            th #{attr}
+                                tbody
+                                    each row in table.bindings
+                                        tr
+                                            each attr in table.headers
+                                                td
+                                                    a(href=row[attr].value) #{row[attr].value}

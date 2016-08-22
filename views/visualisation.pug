@@ -96,42 +96,42 @@ div.col-md-9
                                         a.tablinks(href="#", onclick="openTab(event, 'table')") Table
 
                                 div(style="overflow:scroll")
-                                    include chart.pug
+                                    include vchart.pug
 
-                                include map.pug
+                                include vmap.pug
 
-                                include table.pug
+                                include vtable.pug
 
                     br(style="clear: both;")
-    div#meta.menucontent.row.carousel-holder
-        div.col-md-12
-            div#carousel-example-generic.visual-box(display="inline-block")
-                div.carousel-inner
-                    div.row
-                        div.col-lg-12
-                            if (ds)
-                                each table in ds
-                                    table.table.table-hover
-                                        tbody
-                                            tr
-                                                td 
-                                                    b Title
-                                                td #{table.dataset.label}
-                                            tr
-                                                td 
-                                                    b Description
-                                                td #{table.dataset.description}
-                                            tr
-                                                td 
-                                                    b Original Source
-                                                td 
-                                                    a(href=table.dataset.sourceLink) #{table.dataset.sourceLink}
-                                            tr
-                                                td 
-                                                    b Named Graph
-                                                td #{table.dataset.namedGraph}
-                                            tr
-                                                td 
-                                                    b List of Predicates
-                                                td #{table.dataset.predicates}
-                                    br
+        div#meta.menucontent.row.carousel-holder
+            div.col-md-12
+                div#carousel-example-generic.visual-box(display="inline-block")
+                    div.carousel-inner
+                        div.row
+                            div.col-md-12
+                                if (ds)
+                                    each table in ds
+                                        table.table.table-hover
+                                            tbody
+                                                tr
+                                                    td(style="width:200px")
+                                                        b Title
+                                                    td #{table.dataset.title}
+                                                tr
+                                                    td(style="width:200px")
+                                                        b Description
+                                                    td #{table.dataset.metadata.description}
+                                                tr(style="width:200px")
+                                                    td(style="width:200px")
+                                                        b Original Source
+                                                    td(style="width:200px")
+                                                        a(href=table.dataset.metadata.sourcelink) #{table.dataset.metadata.sourcelink}
+                                                tr
+                                                    td(style="width:200px")
+                                                        b Named Graph
+                                                    td #{table.dataset.metadata.namedgraph}
+                                                tr
+                                                    td(style="width:200px")
+                                                        b Year or Period
+                                                    td #{table.dataset.metadata.yearorperiod}
+                                        br

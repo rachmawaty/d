@@ -1,0 +1,30 @@
+extend main
+
+block content
+	div.col-md-12
+		b #{breadcrumb}
+		br
+		br
+		table.table.table-hover
+			tbody
+				tr
+					td(style="width:200px")
+						b Title
+					td #{dataset.title}
+				tr
+					td(style="width:200px")
+						b Description
+					td #{dataset.metadata.description}
+				tr
+					td(style="width:200px")
+						b Original Source
+					td 
+						a(href=dataset.metadata.sourcelink) #{dataset.metadata.sourcelink}
+				tr
+					td(style="width:200px")
+						b Named Graph
+					td #{dataset.metadata.namedgraph}
+				tr
+					td(style="width:200px")
+						b Year or Period
+					td #{dataset.metadata.yearorperiod}
