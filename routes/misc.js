@@ -8,11 +8,6 @@ module.exports = function (app, models){
 	// insertCategories();
 
 	var updateQuery = function(){
-		// categoryid, idxname, title, query
-		
-		// models.datasets.newDataset("5789373a1822f78f17a12bea", "imd-score-"+idx, title, query, function(err, to){
-
-		// });
 		var list = ["crime", "education", "employment", "environment", "health", "housing", "income"];
 		var list2 = ["Crime", "Education", "Employment", "Environment", "Health", "Housing", "Income"];
 		for (var i=0;i<list.length;i++){
@@ -212,4 +207,78 @@ module.exports = function (app, models){
 	// 		console.log(results.chartOptions);
 	// 	});
 	// });
+
+	var testLoadTime = function(){
+		var start, stop;
+		models.datasets.findAll(function(err, datasets){
+			app.async.eachSeries(datasets, function(dataset, cb){
+				start = app.moment();
+				
+				var query = dataset.query;
+				var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
+
+				app.http.get(api, function(res){
+				    var body = '';
+
+				    res.on('data', function(chunk){
+				        body += chunk;
+				    });
+
+				    res.on('end', function(){
+				        var dt = JSON.parse(body);
+				        stop = app.moment();
+						var diff = stop - start;
+						// console.log(dt.head.vars);
+						console.log("--- DATA SET ", dataset.title, dataset.categoryid, " --- LOAD TIME ", diff);
+				        cb();
+				    });
+				}).on('error', function(e){
+				    console.log("Got an error: ", e);
+				    cb();
+				});
+			}, function(err){
+				if (err) console.log(err);
+				
+			});
+		});
+	}
+
+	// testLoadTime();
+
+	var callAPI = function(query, callback){
+		var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
+
+		app.http.get(api, function(res){
+		    var body = '';
+
+		    res.on('data', function(chunk){
+		        body += chunk;
+		    });
+
+		    res.on('end', function(){
+		        var dt = JSON.parse(body);
+		        callback(null, dt);
+		    });
+		}).on('error', function(e){
+		    console.log("Got an error: ", e);
+		    callback(e, null);
+		});
+	}
+
+	var getCategories = function(){
+		var query = "select distinct * where { "
+				+" ?category <http://www.w3.org/2000/01/rdf-schema#label> ?label ."
+				+" ?category <http://localhost:2525/category#idxname> ?idxname ."
+				+" ?category <http://localhost:2525/category#level> ?level ."
+				+" OPTIONAL { "
+				+" ?category <http://localhost:2525/category#parentid> ?parentid ."
+				+" ?parentid <http://localhost:2525/category#idxname> ?parentidxname ."
+				+" }"
+				+" } order by ?s";
+		callAPI(query, function(err, dt){
+			var headers = dt.head.vars;
+			var items = dt.bindings;
+		});
+	}
+	// getCategories();
 }

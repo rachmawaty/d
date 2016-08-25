@@ -2,7 +2,17 @@ var request = require('request');
 
 module.exports = function(app, models){
 	require('./misc')(app, models);
-	var queries = require('./query')(app, models);
+
+	var filter = " { select distinct ?Subject"
+				+" where {?Subject ?p ?o ."
+				+" FILTER regex(?o, 'manchester', 'i')"
+				+" } } ";
+	var selectAllGraphs = "SELECT DISTINCT ?namedgraph ?label"
+							+" WHERE { GRAPH ?namedgraph { ?s ?p ?o } }"
+							+" ORDER BY ?namedgraph";
+	var defaultQuery = " { select distinct *"
+						+" where { ?Subject ?Predicate ?Object }"
+						+" } ";
 
 	var getCategoriesAndDatasets = function(callback){
 		models.categories.findByLevel(0, function(err, parent_categories){
@@ -52,31 +62,35 @@ module.exports = function(app, models){
 		});
 	}
 
+	var callSPARQLAPI = function(query, callback){
+		var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
+		app.http.get(api, function(res){
+		    var body = '';
+
+		    res.on('data', function(chunk){
+		        body += chunk;
+		    });
+
+		    res.on('end', function(){
+		        var dt = JSON.parse(body);
+		        callback(null, dt);
+		    });
+		}).on('error', function(e){
+		    console.log("Got an error: ", e);
+		    callback(e, null);
+		});
+	};
+
 	var queryData = function(params, callback){
 		var results = [];
 		app.async.each(params, function(param, cb_dt){
 			models.datasets.findByIdxName(param, function(err, dataset){
 				if (dataset){
-					var query = dataset.query;
-					var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
-
-					app.http.get(api, function(res){
-					    var body = '';
-
-					    res.on('data', function(chunk){
-					        body += chunk;
-					    });
-
-					    res.on('end', function(){
-					        var dt = JSON.parse(body);
-					        dt.results.dataset = dataset;
-					        dt.results.headers = dt.head.vars;
-					        results.push(dt.results);
-					        cb_dt();
-					    });
-					}).on('error', function(e){
-					    console.log("Got an error: ", e);
-					    cb_dt();
+					callSPARQLAPI(dataset.query, function(err, dt){
+						dt.results.dataset = dataset;
+					    dt.results.headers = dt.head.vars;
+					    results.push(dt.results);
+						cb_dt();
 					});
 				} else {
 					cb_dt();
@@ -214,12 +228,14 @@ module.exports = function(app, models){
 			var data = {};
 			var mapData = {};
 			var dataTitle = "";
+			var oriData = {};
 			if (results[1]){
 				chartOptions.title = results[2];
 				chartOptions.xtitle = results[1].chartOptions.xtitle;
 				chartOptions.ytitle = results[1].chartOptions.ytitle;
 				data = results[1].chartData;
 				mapData = results[1].mapData;
+				oriData = results[1].oriData;
 				dataTitle = results[2];
 			} else {
 				chartOptions.title = "Chart Title";
@@ -229,7 +245,7 @@ module.exports = function(app, models){
 			res.render('index.pug', { 
 				active: "home", 
 				categories: results[0],
-				ds: results[1].oriData,
+				ds: oriData,
 				title: dataTitle,
 				data: JSON.stringify(data),
 				mapdata: JSON.stringify(mapData),

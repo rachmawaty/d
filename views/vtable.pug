@@ -10,6 +10,10 @@ script.
         });
     } );
 
+    $(document).ready(function() {
+        $('#tableinside').DataTable();
+    } );
+
 div#table.tabcontent
     if (ds)
         table#tabledataset.display(style="width:100%")
@@ -20,8 +24,8 @@ div#table.tabcontent
                 each table in ds
                     tr
                         td
-                            h4 #{table.title}
-                            table.table.table-hover
+                            h4 #{table.dataset.title}
+                            table#tableinside
                                 thead
                                     tr
                                         each attr in table.headers
