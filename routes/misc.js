@@ -238,7 +238,6 @@ module.exports = function (app, models){
 				});
 			}, function(err){
 				if (err) console.log(err);
-				
 			});
 		});
 	}

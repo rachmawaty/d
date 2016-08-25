@@ -14,6 +14,10 @@ module.exports = function(app, models){
 						+" where { ?Subject ?Predicate ?Object }"
 						+" } ";
 
+	function isEmpty(obj) {
+	    return Object.keys(obj).length === 0;
+	}
+
 	var getCategoriesAndDatasets = function(callback){
 		models.categories.findByLevel(0, function(err, parent_categories){
 			if (err) console.log(err);
