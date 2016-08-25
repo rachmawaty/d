@@ -14,10 +14,6 @@ module.exports = function(app, models){
 						+" where { ?Subject ?Predicate ?Object }"
 						+" } ";
 
-	function isEmpty(obj) {
-	    return Object.keys(obj).length === 0;
-	}
-
 	var getCategoriesAndDatasets = function(callback){
 		models.categories.findByLevel(0, function(err, parent_categories){
 			if (err) console.log(err);
@@ -50,6 +46,30 @@ module.exports = function(app, models){
 				});
 			}, function (err) {
 				callback(err, categories);
+			});
+		});
+	};
+
+	var getCategoriesAndDatasets2 = function(callback){
+		models.categories2.findByLevel(0, function(err, parent_categories){
+			if (err) console.log(err);
+			app.async.each(parent_categories, function(parent_category, cb_parent){
+				models.categories2.findByParentId(parent_category.id.value, function(err, children_categories){
+					if (err) console.log(err);
+					app.async.each(children_categories, function(child_category, cb_child){
+						models.datasets2.findByCategoryId(child_category.id.value, function(err, datasets){
+							if (err) console.log(err);
+							child_category.datasets = datasets;
+							cb_child();
+						});
+					}, function(err){
+						parent_category.children = children_categories;
+						cb_parent();
+					});
+				});
+			}, function(err){
+				if (err) console.log(err);
+				callback(err, parent_categories);
 			});
 		});
 	};
@@ -260,8 +280,9 @@ module.exports = function(app, models){
 	});
 
 	app.get('/datasets', function(req, res){
-		getCategoriesAndDatasets(function(err, categories){
-			if (err) console.log(error);
+		getCategoriesAndDatasets2(function(err, categories){
+			if (err) console.log(err);
+			console.log(categories[0].children[0]);
 			res.render('listdata.pug', { 
 				active:"datasets", 
 				categories: categories 
@@ -271,13 +292,13 @@ module.exports = function(app, models){
 
 	app.get('/d/:idxname', function(req, res){
 		var idxname = req.params.idxname;
-		models.datasets.findByIdxName(idxname, function(err, dataset){
+		models.datasets2.findByIdxName(idxname, function(err, dataset){
 			if (err) console.log(err);
-			models.categories.findById(dataset.categoryid, function(err, category){
+			models.categories2.findById(dataset[0].categoryid.value, function(err, category){
 				if (err) console.log(err);
-				models.categories.findByIdxName(category.parentidxname, function(err, parentCategory){
+				models.categories2.findByIdxName(category[0].parentidxname.value, function(err, parentCategory){
 					if (err) console.log(err);
-					var breadcrumb = parentCategory.label + " > " + category.label + " > " + dataset.title;
+					var breadcrumb = parentCategory[0].label.value + " > " + category[0].label.value + " > " + dataset[0].title.value;
 					res.render('metadata.pug', { dataset: dataset, breadcrumb: breadcrumb, active:"datasets" });
 				});
 			});

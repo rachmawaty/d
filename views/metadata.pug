@@ -10,21 +10,21 @@ block content
 				tr
 					td(style="width:200px")
 						b Title
-					td #{dataset.title}
+					td #{dataset[0].title.value}
 				tr
 					td(style="width:200px")
 						b Description
-					td #{dataset.metadata.description}
+					td #{dataset[0].description.value}
 				tr
 					td(style="width:200px")
 						b Original Source
 					td 
-						a(href=dataset.metadata.sourcelink) #{dataset.metadata.sourcelink}
+						a(href=dataset[0].sourcelink.value) #{dataset[0].sourcelink.value}
 				tr
 					td(style="width:200px")
 						b Named Graph
-					td #{dataset.metadata.namedgraph}
+					td #{dataset[0].namedgraph.value}
 				tr
 					td(style="width:200px")
 						b Year or Period
-					td #{dataset.metadata.yearorperiod}
+					td #{dataset[0].yearorperiod.value}

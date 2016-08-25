@@ -9,14 +9,14 @@ block content
                 div.panel.panel-default
                     div.panel-heading
                         h4.panel-title
-                            a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#"+category.idxname) #{category.label}
-                    div.panel-collapse.collapse(id=category.idxname)
+                            a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#"+category.idxname.value) #{category.label.value}
+                    div.panel-collapse.collapse(id=category.idxname.value)
                         each child in category.children
                             div.panel
                                 div.panel-heading
                                     h4.panel-title
-                                        a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxname, href="#"+category.idxname+"-"+child.idxname) #{child.label}
-                                div.panel-collapse.collapse(id=category.idxname+"-"+child.idxname)
+                                        a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxname.value, href="#"+category.idxname.value+"-"+child.idxname.value) #{child.label.value}
+                                div.panel-collapse.collapse(id=category.idxname.value+"-"+child.idxname.value)
                                     if (child.datasets.length > 0)
                                         div.panel-body
                                             table.table.table-hover
@@ -28,5 +28,5 @@ block content
                                                     each dataset in child.datasets
                                                         tr
                                                             td(style="width:300px")
-                                                                a(href="/d/"+dataset.idxname) #{dataset.title}
-                                                            td #{dataset.metadata.description}
+                                                                a(href="/d/"+dataset.idxname.value) #{dataset.title.value}
+                                                            td #{dataset.description.value}
