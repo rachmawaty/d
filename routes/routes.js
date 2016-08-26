@@ -202,8 +202,8 @@ module.exports = function(app, models){
 	};
 
 	var isDataset2 = function(param, callback){
-		models.datasets.findByIdxName(param, function(err, dataset){
-			if (dataset) {
+		models.datasets2.findByIdxName(param, function(err, dataset){
+			if (dataset.length > 0) {
 				var params = [];
 				params.push(param);
 				callback(err, params);
@@ -216,9 +216,8 @@ module.exports = function(app, models){
 	var queryData2 = function(params, callback){
 		var results = [];
 		app.async.each(params, function(param, cb_dt){
-			console.log(param);
 			models.datasets2.findByIdxName(param, function(err, dataset){
-				if (dataset){
+				if (dataset.length > 0){
 					callAPI(dataset[0].query.value, function(err, dt){
 						dt.results.dataset = dataset[0];
 					    dt.results.headers = dt.head.vars;
@@ -318,7 +317,6 @@ module.exports = function(app, models){
 	app.get('/home', function(req, res){
 		// res.redirect('/');
 		var params = req.query.dataset;
-		console.log(params);
 		var categoryparam = req.query.category;
 		console.log(categoryparam);
 		app.async.parallel([
@@ -335,21 +333,14 @@ module.exports = function(app, models){
 					});
 				});
 			}, function(callback){
-				var split = categoryparam ? categoryparam.split("-") : "";
-				console.log(split);
-				var title = "";
-				app.async.eachSeries(split, function(idxName, cb){
-					models.categories.findByIdxName(idxName, function(err, category){
+				if (categoryparam) {
+					models.categories2.findByIdxName(categoryparam, function(err, category){
 						if (err) console.log(err);
-						var label = category.label + " ";
-						title += label;
-						cb();
+						callback(err, categoryparam);
 					});
-				}, function(err){
-					if (err) console.log(err);
-					var chartTitle = title;
-					callback(err, chartTitle);
-				});
+				} else {
+					callback(null, null);
+				}
 			}
 		], function(err, results){
 			if (err) console.log(error);
