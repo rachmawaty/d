@@ -1,0 +1,26 @@
+div.col-md-3
+    p.lead
+        b Category
+    div.panel-group#accordion
+        each category in categories
+            div.panel.panel-default
+                div.panel-heading
+                    h4.panel-title
+                        a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#"+category.idxname.value) #{category.label.value}
+                div.panel-collapse.collapse(id=category.idxname.value)
+                    each child in category.children
+                        div.panel
+                            div.panel-heading
+                                h4.panel-title
+                                    a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxname.value, href="#"+category.idxname.value+"-"+child.idxname.value) #{child.label.value}
+                            div.panel-collapse.collapse(id=category.idxname.value+"-"+child.idxname.value)
+                                if (child.datasets.length > 0)    
+                                    div.panel-body
+                                        form(action="/home", method="get")
+                                            input(type="hidden" name="category" value=child.idxname.value)
+                                            each dataset in child.datasets
+                                                input(type="checkbox" name="dataset" value=dataset.idxname.value)
+                                                span 
+                                                    a(href="/d/"+dataset.idxname.value) #{dataset.title.value}
+                                                br
+                                            input.btn.btn-default.btn-right(id=child.label.value, type="submit", value="Go")

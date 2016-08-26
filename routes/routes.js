@@ -10,9 +10,6 @@ module.exports = function(app, models){
 	var selectAllGraphs = "SELECT DISTINCT ?namedgraph ?label"
 							+" WHERE { GRAPH ?namedgraph { ?s ?p ?o } }"
 							+" ORDER BY ?namedgraph";
-	var defaultQuery = " { select distinct *"
-						+" where { ?Subject ?Predicate ?Object }"
-						+" } ";
 
 	var getCategoriesAndDatasets = function(callback){
 		models.categories.findByLevel(0, function(err, parent_categories){
@@ -86,7 +83,7 @@ module.exports = function(app, models){
 		});
 	}
 
-	var callSPARQLAPI = function(query, callback){
+	var callAPI = function(query, callback){
 		var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
 		app.http.get(api, function(res){
 		    var body = '';
@@ -110,7 +107,7 @@ module.exports = function(app, models){
 		app.async.each(params, function(param, cb_dt){
 			models.datasets.findByIdxName(param, function(err, dataset){
 				if (dataset){
-					callSPARQLAPI(dataset.query, function(err, dt){
+					callAPI(dataset.query, function(err, dt){
 						dt.results.dataset = dataset;
 					    dt.results.headers = dt.head.vars;
 					    results.push(dt.results);
@@ -202,14 +199,194 @@ module.exports = function(app, models){
 			results.oriData = datasets;
 			callback(err, results);
 		});
+	};
+
+	var isDataset2 = function(param, callback){
+		models.datasets.findByIdxName(param, function(err, dataset){
+			if (dataset) {
+				var params = [];
+				params.push(param);
+				callback(err, params);
+			} else {
+				callback(err, param);
+			}
+		});
 	}
 
+	var queryData2 = function(params, callback){
+		var results = [];
+		app.async.each(params, function(param, cb_dt){
+			console.log(param);
+			models.datasets2.findByIdxName(param, function(err, dataset){
+				if (dataset){
+					callAPI(dataset[0].query.value, function(err, dt){
+						dt.results.dataset = dataset[0];
+					    dt.results.headers = dt.head.vars;
+					    results.push(dt.results);
+						cb_dt();
+					});
+				} else {
+					cb_dt();
+				}
+			});
+		}, function(err){
+			if (err) console.log(err);
+			callback(err, results);
+		});
+	};
+
+	var getData2 = function(qresults, callback){
+		var refArea = [];
+		var mapData = [];
+		var chartData = [];
+		var xtitle = "";
+		var ytitle = "";
+		var datasets = [];
+		app.async.each(qresults, function(result, cb_res){
+			datasets.push(result);
+			var chart = {};
+			chart.name = result.dataset.title.value;
+			chart.type = "bar";
+			chart.x = [];
+			chart.y = [];
+			app.async.parallel([
+				function (callback){
+					models.visualisations2.findByDatasetIdAndType(result.dataset.id.value, "chart", function(err, vchart){
+						if (err) console.log(err);
+						callback(err, vchart[0]);
+					});
+				}, function (callback){
+					models.visualisations2.findByDatasetIdAndType(result.dataset.id.value, "map", function(err, vmap){
+						if (err) console.log(err);
+						callback(err, vmap[0]);
+					});
+				}
+			], function(err, res_vis){
+				var vchart = res_vis[0];
+				var vmap = res_vis[1];
+				app.async.each(result.bindings, function(row, cb_row){
+					app.async.parallel([
+						function (callback){
+							chart.x.push(row[vchart.xheader.value].value);
+							chart.y.push(row[vchart.yheader.value].value);
+							xtitle = vchart.xtitle.value;
+							ytitle = vchart.ytitle.value;
+							callback(null);
+						}, function (callback) {
+							if (refArea.indexOf(row[vmap.referencearea.value].value) == -1) {
+								refArea.push(row[vmap.referencearea.value].value);
+								var data = { refArea: row[vmap.referencearea.value].value,
+											area: row[vmap.labelarea.value].value, 
+											lat: row[vmap.latitude.value].value, 
+											long: row[vmap.longitude.value].value,
+											info: result.dataset.title.value + " : " + row[vmap.information.value].value};
+								mapData.push(data);
+								callback(null);
+							} else {
+								var index = refArea.indexOf(row[vmap.referencearea.value].value);
+								if (mapData[index].refArea == row[vmap.referencearea.value].value) {
+									var info = " <br> " + result.dataset.title.value + " : " + row[vmap.information.value].value;
+									mapData[index].info += info;
+									callback(null);
+								} else {
+									callback(null);
+								}
+							}
+						}
+					], function(err, res){
+						if (err) console.log(err);
+						cb_row();
+					});
+				}, function(err){
+					if (err) console.log(err);
+					chartData.push(chart);
+					cb_res();
+				});
+			});
+		}, function(err){
+			if (err) console.log(err);
+			var results = {};
+			var chartOptions = {xtitle: xtitle, ytitle: ytitle};
+			results.chartData = chartData;
+			results.chartOptions = chartOptions;
+			results.mapData = mapData;
+			results.oriData = datasets;
+			callback(err, results);
+		});
+	};
+
 	app.get('/home', function(req, res){
-		res.redirect('/');
+		// res.redirect('/');
+		var params = req.query.dataset;
+		console.log(params);
+		var categoryparam = req.query.category;
+		console.log(categoryparam);
+		app.async.parallel([
+			function(callback){
+				getCategoriesAndDatasets2(function(err, categories){
+					callback(err, categories);
+				});
+			}, function(callback){
+				isDataset2(params, function(err, datasets){
+					queryData2(datasets, function(err, qresults){
+						getData2(qresults, function(err, results){
+							callback(err, results);
+						});
+					});
+				});
+			}, function(callback){
+				var split = categoryparam ? categoryparam.split("-") : "";
+				console.log(split);
+				var title = "";
+				app.async.eachSeries(split, function(idxName, cb){
+					models.categories.findByIdxName(idxName, function(err, category){
+						if (err) console.log(err);
+						var label = category.label + " ";
+						title += label;
+						cb();
+					});
+				}, function(err){
+					if (err) console.log(err);
+					var chartTitle = title;
+					callback(err, chartTitle);
+				});
+			}
+		], function(err, results){
+			if (err) console.log(error);
+			var chartOptions = {};
+			var data = {};
+			var mapData = {};
+			var dataTitle = "";
+			var oriData = {};
+			if (results[1]){
+				chartOptions.title = results[2];
+				chartOptions.xtitle = results[1].chartOptions.xtitle;
+				chartOptions.ytitle = results[1].chartOptions.ytitle;
+				data = results[1].chartData;
+				mapData = results[1].mapData;
+				oriData = results[1].oriData;
+				dataTitle = results[2];
+			} else {
+				chartOptions.title = "Chart Title";
+				chartOptions.xtitle = "X";
+				chartOptions.ytitle = "Y";
+			}
+			res.render('index2.pug', { 
+				active: "home", 
+				categories: results[0],
+				ds: oriData,
+				title: dataTitle,
+				data: JSON.stringify(data),
+				mapdata: JSON.stringify(mapData),
+				chartOptions: JSON.stringify(chartOptions),
+				cat: categoryparam
+			});
+		});
 	});
 
 	app.get('/', function(req, res){
 		var params = req.query.dataset;
+		console.log(params);
 		var categoryparam = req.query.category;
 		console.log(categoryparam);
 		app.async.parallel([
@@ -219,15 +396,11 @@ module.exports = function(app, models){
 				});
 			}, function(callback){
 				isDataset(params, function(err, datasets){
-					if (datasets != null && datasets != '#') {
-						queryData(datasets, function(err, qresults){
-							getData(qresults, function(err, results){
-								callback(err, results);
-							});
+					queryData(datasets, function(err, qresults){
+						getData(qresults, function(err, results){
+							callback(err, results);
 						});
-					} else {
-						callback(err, null);
-					}
+					});
 				});
 			}, function(callback){
 				var split = categoryparam ? categoryparam.split("-") : "";

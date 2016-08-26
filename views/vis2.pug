@@ -100,7 +100,7 @@ div.col-md-9
 
                                 include vmap.pug
 
-                                include vtable.pug
+                                include vtable2.pug
 
                     br(style="clear: both;")
         div#meta.menucontent.row.carousel-holder
@@ -116,23 +116,24 @@ div.col-md-9
                                                 tr
                                                     td(style="width:200px")
                                                         b Title
-                                                    td #{table.dataset.title}
+                                                    td #{table.dataset.title.value}
                                                 tr
                                                     td(style="width:200px")
                                                         b Description
-                                                    td #{table.dataset.metadata.description}
+                                                    td #{table.dataset.description.value}
                                                 tr(style="width:200px")
                                                     td(style="width:200px")
                                                         b Original Source
                                                     td(style="width:200px")
-                                                        a(href=table.dataset.metadata.sourcelink) #{table.dataset.metadata.sourcelink}
+                                                        a(href=table.dataset.sourcelink.value) #{table.dataset.sourcelink.value}
                                                 tr
                                                     td(style="width:200px")
                                                         b Named Graph
-                                                    td #{table.dataset.metadata.namedgraph}
+                                                    td #{table.dataset.namedgraph.value}
                                                 tr
                                                     td(style="width:200px")
                                                         b Year or Period
-                                                    td #{table.dataset.metadata.yearorperiod}
-                                        hr
+                                                    td 
+                                                        a(href=table.dataset.yearorperiod.value) #{table.dataset.yearorperiod.value}
+                                        hr      
                                         br

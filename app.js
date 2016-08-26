@@ -38,6 +38,7 @@ models.visualisations = require('./models/visualisations')(app.mongoose).model;
 models.items = require('./models/items')(app.mongoose).model;
 models.categories2 = require('./models/categories2')(app).model;
 models.datasets2 = require('./models/datasets2')(app).model;
+models.visualisations2 = require('./models/visualisations2')(app).model;
 
 var next = function() {
     app.listen(2525);

@@ -27,4 +27,5 @@ block content
 				tr
 					td(style="width:200px")
 						b Year or Period
-					td #{dataset[0].yearorperiod.value}
+					td 
+						a(href=dataset[0].yearorperiod.value) #{dataset[0].yearorperiod.value}
