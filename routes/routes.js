@@ -201,7 +201,7 @@ module.exports = function(app, models){
 		});
 	};
 
-	var isDataset2 = function(param, callback){
+	var setDatasetParams = function(param, callback){
 		models.datasets2.findByIdxName(param, function(err, dataset){
 			if (dataset.length > 0) {
 				var params = [];
@@ -241,6 +241,15 @@ module.exports = function(app, models){
 		var xtitle = "";
 		var ytitle = "";
 		var datasets = [];
+		//SET COMBINED TABLE
+		var combinedQuery = "SELECT distinct * ";
+		var namedgraph = "";
+		var whereOpenBracket = " where { ";
+		var optOpenBracket = " OPTIONAL { ";
+		var optional = "";
+		var optCloseBracket = " } ";
+		var filter = "";
+		var whereCloseBracket = "}";
 		app.async.each(qresults, function(result, cb_res){
 			datasets.push(result);
 			var chart = {};
@@ -266,30 +275,38 @@ module.exports = function(app, models){
 				app.async.each(result.bindings, function(row, cb_row){
 					app.async.parallel([
 						function (callback){
-							chart.x.push(row[vchart.xheader.value].value);
-							chart.y.push(row[vchart.yheader.value].value);
-							xtitle = vchart.xtitle.value;
-							ytitle = vchart.ytitle.value;
-							callback(null);
-						}, function (callback) {
-							if (refArea.indexOf(row[vmap.referencearea.value].value) == -1) {
-								refArea.push(row[vmap.referencearea.value].value);
-								var data = { refArea: row[vmap.referencearea.value].value,
-											area: row[vmap.labelarea.value].value, 
-											lat: row[vmap.latitude.value].value, 
-											long: row[vmap.longitude.value].value,
-											info: result.dataset.title.value + " : " + row[vmap.information.value].value};
-								mapData.push(data);
+							if (vchart) {
+								chart.x.push(row[vchart.xheader.value].value);
+								chart.y.push(row[vchart.yheader.value].value);
+								xtitle = vchart.xtitle.value;
+								ytitle = vchart.ytitle.value;
 								callback(null);
 							} else {
-								var index = refArea.indexOf(row[vmap.referencearea.value].value);
-								if (mapData[index].refArea == row[vmap.referencearea.value].value) {
-									var info = " <br> " + result.dataset.title.value + " : " + row[vmap.information.value].value;
-									mapData[index].info += info;
+								callback(null);
+							}
+						}, function (callback) {
+							if (vmap) {
+								if (refArea.indexOf(row[vmap.referencearea.value].value) == -1) {
+									refArea.push(row[vmap.referencearea.value].value);
+									var data = { refArea: row[vmap.referencearea.value].value,
+												area: row[vmap.labelarea.value].value, 
+												lat: row[vmap.latitude.value].value, 
+												long: row[vmap.longitude.value].value,
+												info: result.dataset.title.value + " : " + row[vmap.information.value].value};
+									mapData.push(data);
 									callback(null);
 								} else {
-									callback(null);
+									var index = refArea.indexOf(row[vmap.referencearea.value].value);
+									if (mapData[index].refArea == row[vmap.referencearea.value].value) {
+										var info = " <br> " + result.dataset.title.value + " : " + row[vmap.information.value].value;
+										mapData[index].info += info;
+										callback(null);
+									} else {
+										callback(null);
+									}
 								}
+							} else {
+								callback(null);	
 							}
 						}
 					], function(err, res){
@@ -299,7 +316,18 @@ module.exports = function(app, models){
 				}, function(err){
 					if (err) console.log(err);
 					chartData.push(chart);
-					cb_res();
+					var addnamedgraph = " from <" + result.dataset.namedgraph.value + ">";
+					var optquery = " " + result.dataset.optionalquery.value;
+					if (namedgraph == ""){
+						namedgraph = addnamedgraph;
+						filter = result.dataset.filterquery.value;
+						whereOpenBracket += optquery;
+						cb_res();
+					} else {
+						namedgraph += addnamedgraph;
+						optional += optquery;
+						cb_res();
+					}
 				});
 			});
 		}, function(err){
@@ -310,7 +338,26 @@ module.exports = function(app, models){
 			results.chartOptions = chartOptions;
 			results.mapData = mapData;
 			results.oriData = datasets;
-			callback(err, results);
+			if (qresults.length > 1){
+				combinedQuery = combinedQuery + namedgraph + whereOpenBracket + 
+								optOpenBracket + optional + optCloseBracket + 
+								filter + whereCloseBracket;
+				callAPI(combinedQuery, function(err, ct){
+					if (err) console.log(err);
+					// var combinedTable = {};
+					ct.results.headers = ct.head.vars;
+					// combinedTable.items = ct.results.bindings;
+					ct.results.dataset = false;
+					// results.combinedTable = combinedTable;
+					// console.log(ct);
+					console.log(results.oriData.length);
+					results.oriData.push(ct.results);
+					console.log(results.oriData.length);
+					callback(err, results);
+				});
+			} else {
+				callback(err, results);
+			}
 		});
 	};
 
@@ -325,7 +372,7 @@ module.exports = function(app, models){
 					callback(err, categories);
 				});
 			}, function(callback){
-				isDataset2(params, function(err, datasets){
+				setDatasetParams(params, function(err, datasets){
 					queryData2(datasets, function(err, qresults){
 						getData2(qresults, function(err, results){
 							callback(err, results);
@@ -336,7 +383,7 @@ module.exports = function(app, models){
 				if (categoryparam) {
 					models.categories2.findByIdxName(categoryparam, function(err, category){
 						if (err) console.log(err);
-						callback(err, categoryparam);
+						callback(err, category[0].label.value);
 					});
 				} else {
 					callback(null, null);
@@ -377,9 +424,9 @@ module.exports = function(app, models){
 
 	app.get('/', function(req, res){
 		var params = req.query.dataset;
-		console.log(params);
+		// console.log(params);
 		var categoryparam = req.query.category;
-		console.log(categoryparam);
+		// console.log(categoryparam);
 		app.async.parallel([
 			function(callback){
 				getCategoriesAndDatasets(function(err, categories){
@@ -446,7 +493,7 @@ module.exports = function(app, models){
 	app.get('/datasets', function(req, res){
 		getCategoriesAndDatasets2(function(err, categories){
 			if (err) console.log(err);
-			console.log(categories[0].children[0]);
+			// console.log(categories[0].children[0]);
 			res.render('listdata.pug', { 
 				active:"datasets", 
 				categories: categories 
@@ -463,7 +510,13 @@ module.exports = function(app, models){
 				models.categories2.findByIdxName(category[0].parentidxname.value, function(err, parentCategory){
 					if (err) console.log(err);
 					var breadcrumb = parentCategory[0].label.value + " > " + category[0].label.value + " > " + dataset[0].title.value;
-					res.render('metadata.pug', { dataset: dataset, breadcrumb: breadcrumb, active:"datasets" });
+					res.render('metadata.pug', { 
+						dataset: dataset, 
+						breadcrumb: breadcrumb, 
+						category: category, 
+						idxname: idxname, 
+						active:"datasets" 
+					});
 				});
 			});
 		});

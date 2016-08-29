@@ -1,3 +1,32 @@
+script.
+    var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : sParameterName[1];
+            }
+        }
+    };
+    var toggles = document.getElementsByClassName('collapse');
+    var category = getUrlParameter('category');
+        
+    $(document).ready(function() {
+        console.log('CAT :' + category);
+        console.log('-----------------------');
+        console.log(toggles[1].id);
+        if (!category) {
+            console.log('MASUK');
+            document.getElementById(toggles[1].id).className += " in";
+            document.getElementById(toggles[2].id).className += " in";
+        }
+    });
+
 div.col-md-3
     p.lead
         b Category
@@ -12,8 +41,8 @@ div.col-md-3
                         div.panel
                             div.panel-heading
                                 h4.panel-title
-                                    a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxname.value, href="#"+category.idxname.value+"-"+child.idxname.value) #{child.label.value}
-                            div.panel-collapse.collapse(id=category.idxname.value+"-"+child.idxname.value)
+                                    a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxname.value, href="#"+child.idxname.value) #{child.label.value}
+                            div.panel-collapse.collapse(id=child.idxname.value)
                                 if (child.datasets.length > 0)    
                                     div.panel-body
                                         form(action="/home", method="get")

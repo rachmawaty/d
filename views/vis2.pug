@@ -111,29 +111,31 @@ div.col-md-9
                             div.col-md-12
                                 if (ds)
                                     each table in ds
-                                        table.table.table-hover
-                                            tbody
-                                                tr
-                                                    td(style="width:200px")
-                                                        b Title
-                                                    td #{table.dataset.title.value}
-                                                tr
-                                                    td(style="width:200px")
-                                                        b Description
-                                                    td #{table.dataset.description.value}
-                                                tr(style="width:200px")
-                                                    td(style="width:200px")
-                                                        b Original Source
-                                                    td(style="width:200px")
-                                                        a(href=table.dataset.sourcelink.value) #{table.dataset.sourcelink.value}
-                                                tr
-                                                    td(style="width:200px")
-                                                        b Named Graph
-                                                    td #{table.dataset.namedgraph.value}
-                                                tr
-                                                    td(style="width:200px")
-                                                        b Year or Period
-                                                    td 
-                                                        a(href=table.dataset.yearorperiod.value) #{table.dataset.yearorperiod.value}
-                                        hr      
-                                        br
+                                        if (table.dataset.title)
+                                            table.table.table-hover
+                                                tbody
+                                                    tr
+                                                        td(style="width:200px")
+                                                            b Title
+                                                        td 
+                                                            b #{table.dataset.title.value}
+                                                    tr
+                                                        td(style="width:200px")
+                                                            b Description
+                                                        td #{table.dataset.description.value}
+                                                    tr(style="width:200px")
+                                                        td(style="width:200px")
+                                                            b Original Source
+                                                        td(style="width:200px")
+                                                            a(href=table.dataset.sourcelink.value) #{table.dataset.sourcelink.value}
+                                                    tr
+                                                        td(style="width:200px")
+                                                            b Named Graph
+                                                        td #{table.dataset.namedgraph.value}
+                                                    tr
+                                                        td(style="width:200px")
+                                                            b Year or Period
+                                                        td 
+                                                            a(href=table.dataset.yearorperiod.value) #{table.dataset.yearorperiod.value}
+                                            hr      
+                                            br

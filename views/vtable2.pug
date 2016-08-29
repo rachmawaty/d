@@ -11,7 +11,9 @@ script.
     } );
 
     $(document).ready(function() {
-        $('#tableinside').DataTable();
+        $('#tableinside').DataTable({
+            "pageLength": 5
+        });
     } );
 
 div#table.tabcontent
@@ -24,8 +26,11 @@ div#table.tabcontent
                 each table in ds
                     tr
                         td
-                            h4 #{table.dataset.title.value}
-                            table#tableinside
+                            if (table.dataset.title)
+                                h4 #{table.dataset.title.value}
+                            else 
+                                h4 Combined Table
+                            table#tableinside.cell-border
                                 thead
                                     tr
                                         each attr in table.headers

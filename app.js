@@ -11,10 +11,10 @@ app.async = require('async');
 app.moment = require("moment");
 
 /*** data connection ***/
-app.mongoStore = require('connect-mongo');
+// app.mongoStore = require('connect-mongo');
 app.mongoose = require('mongoose');
 // app.mongoose.connect('mongodb://localhost:27017/dapp');
-app.mongoose.connect('mongodb://localhost:27017/dapp2');
+// app.mongoose.connect('mongodb://localhost:27017/dapp2');
 
 /*** visualisation ***/
 // app.plotly = require('plotly')("rachmawaty", "7x4q8r5vid");

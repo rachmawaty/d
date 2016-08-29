@@ -29,3 +29,7 @@ block content
 						b Year or Period
 					td 
 						a(href=dataset[0].yearorperiod.value) #{dataset[0].yearorperiod.value}
+		form(action="/home", method="get")
+			input(type="hidden" name="category" value=category[0].idxname.value)
+			input(type="hidden" name="dataset" value=idxname)
+			input.btn.btn-default.btn-right(id=dataset[0].categoryid.value, type="submit", value="Visualise")

@@ -34,7 +34,10 @@ module.exports = function(app) {
 				+" ?id <http://purl.org/dc/terms/description> ?description ."
 				+" ?id <http://localhost:2525/metadata#sourcelink> ?sourcelink ."
 				+" ?id <http://localhost:2525/metadata#namedgraph> ?namedgraph ."
+				+" OPTIONAL {"
 				+" ?id <http://localhost:2525/metadata#yearorperiod> ?yearorperiod ."
+				+" ?id <http://localhost:2525/dataset#optionalquery> ?optionalquery ."
+				+" ?id <http://localhost:2525/dataset#filterquery> ?filterquery .}"
 				+" } order by ?id";
 		callAPI(query, function(err, dt){
 			var headers = dt.head.vars;
@@ -55,6 +58,9 @@ module.exports = function(app) {
 				+" ?id <http://localhost:2525/metadata#sourcelink> ?sourcelink ."
 				+" ?id <http://localhost:2525/metadata#namedgraph> ?namedgraph ."
 				+" ?id <http://localhost:2525/metadata#yearorperiod> ?yearorperiod ."
+				+" OPTIONAL {"
+				+" ?id <http://localhost:2525/dataset#optionalquery> ?optionalquery ."
+				+" ?id <http://localhost:2525/dataset#filterquery> ?filterquery .}"
 				+" }";
 		callAPI(query, function(err, dt){
 			var headers = dt.head.vars;
@@ -75,6 +81,9 @@ module.exports = function(app) {
 				+" ?id <http://localhost:2525/metadata#sourcelink> ?sourcelink ."
 				+" ?id <http://localhost:2525/metadata#namedgraph> ?namedgraph ."
 				+" ?id <http://localhost:2525/metadata#yearorperiod> ?yearorperiod ."
+				+" OPTIONAL {"
+				+" ?id <http://localhost:2525/dataset#optionalquery> ?optionalquery ."
+				+" ?id <http://localhost:2525/dataset#filterquery> ?filterquery .}"
 				+" }";
 		callAPI(query, function(err, dt){
 			var headers = dt.head.vars;
@@ -95,6 +104,9 @@ module.exports = function(app) {
 				+" ?id <http://localhost:2525/metadata#sourcelink> ?sourcelink ."
 				+" ?id <http://localhost:2525/metadata#namedgraph> ?namedgraph ."
 				+" ?id <http://localhost:2525/metadata#yearorperiod> ?yearorperiod ."
+				+" OPTIONAL {"
+				+" ?id <http://localhost:2525/dataset#optionalquery> ?optionalquery ."
+				+" ?id <http://localhost:2525/dataset#filterquery> ?filterquery . }"
 				+" } order by ?id";
 		callAPI(query, function(err, dt){
 			var headers = dt.head.vars;
