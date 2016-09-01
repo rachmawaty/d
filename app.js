@@ -32,9 +32,9 @@ app.use(express.static(app.path.join(__dirname, 'public')));
 app.set('view engine', 'pug');
 
 var models = {};
-models.categories = require('./models/categories')(app.mongoose).model;
-models.datasets = require('./models/datasets')(app.mongoose).model;
-models.visualisations = require('./models/visualisations')(app.mongoose).model;
+// models.categories = require('./models/categories')(app.mongoose).model;
+// models.datasets = require('./models/datasets')(app.mongoose).model;
+// models.visualisations = require('./models/visualisations')(app.mongoose).model;
 // models.items = require('./models/items')(app.mongoose).model;
 models.categories2 = require('./models/categories2')(app).model;
 models.datasets2 = require('./models/datasets2')(app).model;

@@ -2,50 +2,10 @@ var request = require('request');
 
 module.exports = function(app, models){
 	require('./misc')(app, models);
-
-	var filter = " { select distinct ?Subject"
-				+" where {?Subject ?p ?o ."
-				+" FILTER regex(?o, 'manchester', 'i')"
-				+" } } ";
+	
 	var selectAllGraphs = "SELECT DISTINCT ?namedgraph ?label"
-							+" WHERE { GRAPH ?namedgraph { ?s ?p ?o } }"
-							+" ORDER BY ?namedgraph";
-
-	var getCategoriesAndDatasets = function(callback){
-		models.categories.findByLevel(0, function(err, parent_categories){
-			if (err) console.log(err);
-			var categories = [];
-			app.async.each(parent_categories, function(parent_category, cb_parent){
-				var p_category = parent_category.toObject();
-				models.categories.findByParentIdxName(parent_category.idxname, function(err, children_categories){
-					if (err) console.log(err);
-					var c_categories = [];
-					app.async.each(children_categories, function(child_category, cb_child){
-						var c_category = child_category.toObject();	
-						models.datasets.findByCategoryId(c_category._id, function(err, datasets){
-							if (err) console.log(err);
-							var c_datasets = [];
-							app.async.each(datasets, function(dataset, cb_dts){
-								c_datasets.push(dataset.toObject());
-								cb_dts();
-							}, function(err){
-								c_category.datasets = c_datasets;
-								c_categories.push(c_category);
-								cb_child();
-							});
-						});
-					}, function(err){
-						if (err) console.log(err);
-						p_category.children = c_categories;
-						categories.push(p_category);
-						cb_parent();
-					});
-				});
-			}, function (err) {
-				callback(err, categories);
-			});
-		});
-	};
+						+" WHERE { GRAPH ?namedgraph { ?s ?p ?o } }"
+						+" ORDER BY ?namedgraph";
 
 	var getCategoriesAndDatasets2 = function(callback){
 		models.categories2.findByLevel(0, function(err, parent_categories){
@@ -71,20 +31,9 @@ module.exports = function(app, models){
 		});
 	};
 
-	var isDataset = function(param, callback){
-		models.datasets.findByIdxName(param, function(err, dataset){
-			if (dataset) {
-				var params = [];
-				params.push(param);
-				callback(err, params);
-			} else {
-				callback(err, param);
-			}
-		});
-	}
-
 	var callAPI = function(query, callback){
 		var api = "http://localhost:8890/sparql?query="+encodeURIComponent(query)+"&format=json";
+		// var st = app.moment();
 		app.http.get(api, function(res){
 		    var body = '';
 
@@ -93,111 +42,14 @@ module.exports = function(app, models){
 		    });
 
 		    res.on('end', function(){
+		    	// var fn = app.moment();
+		    	// console.log("BEFORE PARSE:", fn-st);
 		        var dt = JSON.parse(body);
 		        callback(null, dt);
 		    });
 		}).on('error', function(e){
 		    console.log("Got an error: ", e);
 		    callback(e, null);
-		});
-	};
-
-	var queryData = function(params, callback){
-		var results = [];
-		app.async.each(params, function(param, cb_dt){
-			models.datasets.findByIdxName(param, function(err, dataset){
-				if (dataset){
-					callAPI(dataset.query, function(err, dt){
-						dt.results.dataset = dataset;
-					    dt.results.headers = dt.head.vars;
-					    results.push(dt.results);
-						cb_dt();
-					});
-				} else {
-					cb_dt();
-				}
-			});
-		}, function(err){
-			if (err) console.log(err);
-			callback(err, results);
-		});
-	};
-
-	var getData = function(qresults, callback){
-		var refArea = [];
-		var mapData = [];
-		var chartData = [];
-		var xtitle = "";
-		var ytitle = "";
-		var datasets = [];
-		app.async.each(qresults, function(result, cb_res){
-			datasets.push(result);
-			var chart = {};
-			chart.name = result.dataset.title;
-			chart.type = "bar";
-			chart.x = [];
-			chart.y = [];
-			app.async.each(result.bindings, function(row, cb_row){
-				var mapDataLength = mapData.length;
-				app.async.parallel([
-					function (callback){
-						models.visualisations.findByDatasetIdAndType(result.dataset._id, "chart", function(err, vchart){
-							if (vchart) {
-								chart.x.push(row[vchart.chart.xheader].value);
-								chart.y.push(row[vchart.chart.yheader].value);
-								xtitle = vchart.chart.xtitle;
-								ytitle = vchart.chart.ytitle;
-								callback(null);
-							} else {
-								callback(null);
-							}
-						});
-					}, function (callback) {
-						models.visualisations.findByDatasetIdAndType(result.dataset._id, "map", function(err, vmap){
-							if (vmap){
-								if (refArea.indexOf(row[vmap.map.referencearea].value) == -1) {
-									refArea.push(row[vmap.map.referencearea].value);
-									var data = { refArea: row[vmap.map.referencearea].value,
-												area: row[vmap.map.labelarea].value, 
-												lat: row[vmap.map.latitude].value, 
-												long: row[vmap.map.longitude].value,
-												info: result.dataset.title + " : " + row[vmap.map.information].value};
-									mapData.push(data);
-									callback(null);
-								} else {
-									var index = refArea.indexOf(row[vmap.map.referencearea].value);
-									if (mapData[index].refArea == row[vmap.map.referencearea].value) {
-										var info = " <br> " + result.dataset.title + " : " + row[vmap.map.information].value;
-										mapData[index].info += info;
-										callback(null);
-									} else {
-										callback(null);
-									}
-								}
-							} else {
-								callback(null);
-							}
-						});
-					}
-				], function(err, res){
-					if (err) console.log(err);
-					cb_row();
-				});
-				
-			}, function(err){
-				if (err) console.log(err);
-				chartData.push(chart);
-				cb_res();
-			});
-		}, function(err){
-			if (err) console.log(err);
-			var results = {};
-			var chartOptions = {xtitle: xtitle, ytitle: ytitle};
-			results.chartData = chartData;
-			results.chartOptions = chartOptions;
-			results.mapData = mapData;
-			results.oriData = datasets;
-			callback(err, results);
 		});
 	};
 
@@ -215,13 +67,17 @@ module.exports = function(app, models){
 
 	var queryData2 = function(params, callback){
 		var results = [];
-		app.async.each(params, function(param, cb_dt){
+		var start = app.moment();
+		app.async.eachSeries(params, function(param, cb_dt){
 			models.datasets2.findByIdxName(param, function(err, dataset){
 				if (dataset.length > 0){
+					var startparam = app.moment();
 					callAPI(dataset[0].query.value, function(err, dt){
+						var endparam = app.moment();
 						dt.results.dataset = dataset[0];
 					    dt.results.headers = dt.head.vars;
 					    results.push(dt.results);
+					    console.log(param, ": ", endparam-startparam);
 						cb_dt();
 					});
 				} else {
@@ -230,11 +86,14 @@ module.exports = function(app, models){
 			});
 		}, function(err){
 			if (err) console.log(err);
+			var finish = app.moment();
+			if (params) console.log('diff ', params.length, " : ", finish - start);
 			callback(err, results);
 		});
 	};
 
 	var getData2 = function(qresults, callback){
+		console.log("QUERY RESULTS RETRIEVED");
 		var refArea = [];
 		var mapData = [];
 		var chartData = [];
@@ -342,17 +201,22 @@ module.exports = function(app, models){
 				combinedQuery = combinedQuery + namedgraph + whereOpenBracket + 
 								optOpenBracket + optional + optCloseBracket + 
 								filter + whereCloseBracket;
+				// console.log(combinedQuery);
+				var startcombine = app.moment();
 				callAPI(combinedQuery, function(err, ct){
 					if (err) console.log(err);
+					var finishcombine = app.moment();
+					console.log("combine ", finishcombine-startcombine);
 					// var combinedTable = {};
 					ct.results.headers = ct.head.vars;
+					console.log(ct.results.headers);
 					// combinedTable.items = ct.results.bindings;
 					ct.results.dataset = false;
 					// results.combinedTable = combinedTable;
-					// console.log(ct);
-					console.log(results.oriData.length);
+					// console.log(ct.results.bindings);
+					// console.log(results.oriData.length);
 					results.oriData.push(ct.results);
-					console.log(results.oriData.length);
+					// console.log(results.oriData.length);
 					callback(err, results);
 				});
 			} else {
@@ -362,7 +226,6 @@ module.exports = function(app, models){
 	};
 
 	app.get('/home', function(req, res){
-		// res.redirect('/');
 		var params = req.query.dataset;
 		var categoryparam = req.query.category;
 		console.log(categoryparam);
@@ -423,77 +286,12 @@ module.exports = function(app, models){
 	});
 
 	app.get('/', function(req, res){
-		var params = req.query.dataset;
-		// console.log(params);
-		var categoryparam = req.query.category;
-		// console.log(categoryparam);
-		app.async.parallel([
-			function(callback){
-				getCategoriesAndDatasets(function(err, categories){
-					callback(err, categories);
-				});
-			}, function(callback){
-				isDataset(params, function(err, datasets){
-					queryData(datasets, function(err, qresults){
-						getData(qresults, function(err, results){
-							callback(err, results);
-						});
-					});
-				});
-			}, function(callback){
-				var split = categoryparam ? categoryparam.split("-") : "";
-				console.log(split);
-				var title = "";
-				app.async.eachSeries(split, function(idxName, cb){
-					models.categories.findByIdxName(idxName, function(err, category){
-						if (err) console.log(err);
-						var label = category.label + " ";
-						title += label;
-						cb();
-					});
-				}, function(err){
-					if (err) console.log(err);
-					var chartTitle = title;
-					callback(err, chartTitle);
-				});
-			}
-		], function(err, results){
-			if (err) console.log(error);
-			var chartOptions = {};
-			var data = {};
-			var mapData = {};
-			var dataTitle = "";
-			var oriData = {};
-			if (results[1]){
-				chartOptions.title = results[2];
-				chartOptions.xtitle = results[1].chartOptions.xtitle;
-				chartOptions.ytitle = results[1].chartOptions.ytitle;
-				data = results[1].chartData;
-				mapData = results[1].mapData;
-				oriData = results[1].oriData;
-				dataTitle = results[2];
-			} else {
-				chartOptions.title = "Chart Title";
-				chartOptions.xtitle = "X";
-				chartOptions.ytitle = "Y";
-			}
-			res.render('index.pug', { 
-				active: "home", 
-				categories: results[0],
-				ds: oriData,
-				title: dataTitle,
-				data: JSON.stringify(data),
-				mapdata: JSON.stringify(mapData),
-				chartOptions: JSON.stringify(chartOptions),
-				cat: categoryparam
-			});
-		});
+		res.redirect('/home');
 	});
 
 	app.get('/datasets', function(req, res){
 		getCategoriesAndDatasets2(function(err, categories){
 			if (err) console.log(err);
-			// console.log(categories[0].children[0]);
 			res.render('listdata.pug', { 
 				active:"datasets", 
 				categories: categories 

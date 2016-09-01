@@ -28,11 +28,12 @@ module.exports = function(app) {
 				+" ?id <http://www.w3.org/2000/01/rdf-schema#label> ?label ."
 				+" ?id <http://localhost:2525/category#idxname> ?idxname ."
 				+" ?id <http://localhost:2525/category#level> ?level ."
+				+" ?id <http://purl.org/dc/terms/description> ?description ."
 				+" OPTIONAL { "
 				+" ?id <http://localhost:2525/category#parentid> ?parentid ."
 				+" ?parentid <http://localhost:2525/category#idxname> ?parentidxname ."
 				+" }"
-				+" } order by ?s";
+				+" } order by ?label";
 		callAPI(query, function(err, dt){
 			var headers = dt.head.vars;
 			var categories = dt.results.bindings;
@@ -45,6 +46,7 @@ module.exports = function(app) {
 				+" <"+ categoryid +"> <http://www.w3.org/2000/01/rdf-schema#label> ?label ."
 				+" <"+ categoryid +"> <http://localhost:2525/category#idxname> ?idxname ."
 				+" <"+ categoryid +"> <http://localhost:2525/category#level> ?level ."
+				+" <"+ categoryid +"> <http://purl.org/dc/terms/description> ?description ."
 				+" OPTIONAL { "
 				+" <"+ categoryid +"> <http://localhost:2525/category#parentid> ?parentid ."
 				+" ?parentid <http://localhost:2525/category#idxname> ?parentidxname ."
@@ -61,6 +63,7 @@ module.exports = function(app) {
 				+" ?id <http://www.w3.org/2000/01/rdf-schema#label> ?label ."
 				+" ?id <http://localhost:2525/category#idxname> '"+ idxname +"' ."
 				+" ?id <http://localhost:2525/category#level> ?level ."
+				+" ?id <http://purl.org/dc/terms/description> ?description ."
 				+" OPTIONAL { "
 				+" ?id <http://localhost:2525/category#parentid> ?parentid ."
 				+" ?parentid <http://localhost:2525/category#idxname> ?parentidxname ."
@@ -78,6 +81,7 @@ module.exports = function(app) {
 				+" ?id <http://www.w3.org/2000/01/rdf-schema#label> ?label ."
 				+" ?id <http://localhost:2525/category#idxname> ?idxname ."
 				+" ?id <http://localhost:2525/category#level> '"+ level +"' ."
+				+" ?id <http://purl.org/dc/terms/description> ?description ."
 				+" OPTIONAL { "
 				+" ?id <http://localhost:2525/category#parentid> ?parentid ."
 				+" ?parentid <http://localhost:2525/category#idxname> ?parentidxname ."
@@ -95,6 +99,7 @@ module.exports = function(app) {
 				+" ?id <http://www.w3.org/2000/01/rdf-schema#label> ?label ."
 				+" ?id <http://localhost:2525/category#idxname> ?idxname ."
 				+" ?id <http://localhost:2525/category#level> ?level ."
+				+" ?id <http://purl.org/dc/terms/description> ?description ."
 				+" ?id <http://localhost:2525/category#parentid> <"+ parentid +"> ."
 				+" <"+ parentid +"> <http://localhost:2525/category#idxname> ?parentidxname ."
 				+" } order by ?id";
@@ -110,6 +115,7 @@ module.exports = function(app) {
 				+" ?id <http://www.w3.org/2000/01/rdf-schema#label> ?label ."
 				+" ?id <http://localhost:2525/category#idxname> ?idxname ."
 				+" ?id <http://localhost:2525/category#level> ?level ."
+				+" ?id <http://purl.org/dc/terms/description> ?description ."
 				+" ?id <http://localhost:2525/category#parentid> ?parentid ."
 				+" ?parentid <http://localhost:2525/category#idxname> '"+ parentidxname +"' ."
 				+" } order by ?id";

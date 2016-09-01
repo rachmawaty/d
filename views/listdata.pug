@@ -1,6 +1,11 @@
 extend main
 
 block content
+    script.
+        $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip(); 
+        });
+        
     div.col-md-12
         p.lead
             b Datasets
@@ -9,13 +14,15 @@ block content
                 div.panel.panel-default
                     div.panel-heading
                         h4.panel-title
-                            a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#"+category.idxname.value) #{category.label.value}
+                            a.accordion-toggle(data-toggle="collapse", data-parent="#accordion", href="#"+category.idxname.value)
+                                span(data-toggle="tooltip", title=category.description.value) #{category.label.value}
                     div.panel-collapse.collapse(id=category.idxname.value)
                         each child in category.children
                             div.panel
                                 div.panel-heading
                                     h4.panel-title
-                                        a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxname.value, href="#"+category.idxname.value+"-"+child.idxname.value) #{child.label.value}
+                                        a.accordion-toggle(data-toggle="collapse", data-parent="#"+category.idxname.value, href="#"+category.idxname.value+"-"+child.idxname.value)
+                                            span(data-toggle="tooltip", title=child.description.value) #{child.label.value}
                                 div.panel-collapse.collapse(id=category.idxname.value+"-"+child.idxname.value)
                                     if (child.datasets.length > 0)
                                         div.panel-body

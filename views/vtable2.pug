@@ -8,9 +8,8 @@ script.
             "scrollX": 720,
             "scrollY": 480
         });
-    } );
-
-    $(document).ready(function() {
+        var tableinsides = document.getElementsByClassName('cell-border');
+        console.log(tableinsides.length);
         $('#tableinside').DataTable({
             "pageLength": 5
         });
@@ -40,4 +39,7 @@ div#table.tabcontent
                                         tr
                                             each attr in table.headers
                                                 td
-                                                    a(href=row[attr].value) #{row[attr].value}
+                                                    if (row[attr].type == 'uri')
+                                                        a(href=row[attr].value) #{row[attr].value}
+                                                    else
+                                                        | #{row[attr].value}
